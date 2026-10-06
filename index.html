@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%237a1f2b'/%3E%3Crect x='4.5' y='7.5' width='7' height='10' rx='2' fill='%23fff'/%3E%3Crect x='12.5' y='13' width='7' height='11.5' rx='2' fill='%23fff'/%3E%3Crect x='20.5' y='9.5' width='7' height='8' rx='2' fill='%23fff'/%3E%3C/svg%3E">
 <title>Vorlesungsverzeichnis &amp; Stundenplaner</title>
 <style>
 :root{
@@ -73,7 +74,9 @@ main .card.help{margin-top:3rem;background:var(--soft);}
 .bar{position:sticky;top:0;z-index:40;min-height:var(--bar);display:flex;gap:.45rem;align-items:center;
  flex-wrap:wrap;padding:.4rem .8rem;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);
  border-bottom:1px solid var(--line);}
-.bar .brand{font-weight:700;color:var(--accent);white-space:nowrap;}
+.bar .brand{display:flex;align-items:center;gap:.4rem;font-weight:700;color:var(--accent);
+ white-space:nowrap;}
+.brandicon{width:19px;height:19px;flex:none;display:block;}
 .bar input[type=search]{flex:1;min-width:150px;max-width:360px;padding:.4rem .75rem;
  border:1px solid var(--line);border-radius:20px;font-size:14px;}
 .bar button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:.38rem .65rem;
@@ -335,8 +338,8 @@ mark{background:#ffe9a8;padding:0 .1em;}
  html{font-size:15.5px;}
  body{overflow-x:hidden;}
  .bar{gap:.35rem;padding:.35rem .5rem;}
- .bar input[type=search]{min-width:110px;order:-1;flex:1 1 100%;}
- .bar .brand{display:none;}
+ .bar input[type=search]{min-width:90px;flex:1 1 120px;max-width:none;}
+ .bar .brandtxt{display:none;}   /* schmal: nur das Zeichen */
  .bar button{padding:.42rem .6rem;}
  /* Filter in eine seitlich schiebbare Zeile statt über mehrere Reihen */
  .filters{padding:.35rem .5rem;gap:.3rem;flex-wrap:nowrap;overflow-x:auto;
@@ -423,7 +426,15 @@ mark{background:#ffe9a8;padding:0 .1em;}
 <div id="screenApp" hidden>
   <div class="bar">
     <button id="tocBtn" data-i18n-title="bar.tocTitle">☰</button>
-    <span class="brand">VVZ</span>
+    <span class="brand">
+      <svg class="brandicon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <rect width="32" height="32" rx="7" fill="#7a1f2b"/>
+        <rect x="4.5" y="7.5" width="7" height="10" rx="2" fill="#fff"/>
+        <rect x="12.5" y="13" width="7" height="11.5" rx="2" fill="#fff"/>
+        <rect x="20.5" y="9.5" width="7" height="8" rx="2" fill="#fff"/>
+      </svg>
+      <span class="brandtxt">HfMT</span>
+    </span>
     <input id="q" type="search" data-i18n-ph="bar.search">
     <span id="hits" class="hits"></span>
     <button id="collapseAll" data-i18n="bar.collapse" data-i18n-title="bar.collapseTitle"></button>
