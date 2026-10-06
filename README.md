@@ -1,6 +1,6 @@
 # Vorlesungsverzeichnis & Stundenplaner
 
-Eine einzelne HTML-Datei, die aus dem XML-Export eines QIS/HISinOne-Vorlesungsverzeichnisses
+Eine einzelne HTML-Datei, die aus dem XML-Export eines Vorlesungsverzeichnisses (QIS/HISinOne)
 eine durchsuchbare Übersicht macht — mit Stundenplan, Überschneidungswarnung und
 Kalenderexport. Kein Server, keine Installation, keine Datenübertragung: alles läuft
 im Browser.
