@@ -338,7 +338,10 @@ mark{background:#ffe9a8;padding:0 .1em;}
  html{font-size:15.5px;}
  body{overflow-x:hidden;}
  .bar{gap:.35rem;padding:.35rem .5rem;}
- .bar input[type=search]{min-width:90px;flex:1 1 120px;max-width:none;}
+ .bar input[type=search]{min-width:70px;flex:1 1 70px;max-width:none;}
+ .bar .spacer{display:none;}            /* Suchfeld nimmt den Platz */
+ .bar #langBtn{display:none;}           /* steckt in der Schublade */
+ #planBtn{flex:none;}
  .bar .brandtxt{display:none;}   /* schmal: nur das Zeichen */
  .bar button{padding:.42rem .6rem;}
  /* Filter in eine seitlich schiebbare Zeile statt über mehrere Reihen */
@@ -350,6 +353,7 @@ mark{background:#ffe9a8;padding:0 .1em;}
  .chip{padding:.3rem .7rem;}
  /* selten gebrauchte Knöpfe wandern in die Schublade */
  .bar #collapseAll,.bar #expandAll,.bar #compactBtn,.bar #printBtn,.bar #newFileBtn{display:none;}
+ .bar .hits{font-size:11.5px;}
  .toctools{display:flex;}
 
  article.kurs{padding:.65rem .7rem;}
@@ -1608,7 +1612,7 @@ function buildTOC(){
   /* Auf schmalen Schirmen stehen die Werkzeugknöpfe hier statt in der Kopfleiste */
   var tools=document.createElement('div'); tools.className='toctools';
   [['collapseAll','bar.collapse'],['expandAll','bar.expand'],['compactBtn','bar.compact'],
-   ['printBtn','bar.print'],['newFileBtn','bar.newfile']].forEach(function(p){
+   ['printBtn','bar.print'],['newFileBtn','bar.newfile'],['langBtn','lang.other']].forEach(function(p){
     var orig=$('#'+p[0]); if(!orig) return;
     var b=document.createElement('button'); b.type='button'; b.textContent=t(p[1]);
     b.classList.toggle('on',orig.classList.contains('on'));
@@ -1756,7 +1760,11 @@ function runFilter(){
     el.classList.toggle('hidden',!any);
     if(any && term) el.classList.remove('collapsed');
   });
-  $('#hits').textContent=(term||onlyPicked||orteAll.length)?t('bar.hits',n,allK.length):'';
+  var orteAus=false, uo=state.ui.orte||{};
+  for(var k in uo) if(uo[k]===false){orteAus=true;break;}
+  var wirdGefiltert = !!term || onlyPicked || !!state.ui.bereich || orteAus ||
+                      (state.ui.showHidden!==true && n<allK.length);
+  $('#hits').textContent = wirdGefiltert ? t('bar.hits',n,allK.length) : '';
 }
 
 /* ═══════════════ Kollisionshinweise im Katalog ═══════════════ */
