@@ -1,0 +1,2663 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vorlesungsverzeichnis &amp; Stundenplaner</title>
+<style>
+:root{
+ --fg:#1c1c1e;--muted:#6b6b70;--line:#dcdce0;--soft:#f4f4f6;--softer:#fafafb;
+ --accent:#7a1f2b;--accent-soft:#f5e7e9;
+ --fest:#1f6f4a;--fest-soft:#e4f2ea;
+ --evtl:#9a6a12;--evtl-soft:#fbf1dd;
+ --warn:#b3261e;--warn-soft:#fdeae8;
+ --bg:#fff;--side:290px;--bar:54px;
+}
+*{box-sizing:border-box;}
+html{font:15px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+ color:var(--fg);background:var(--bg);-webkit-text-size-adjust:100%;}
+body{margin:0;}
+a{color:var(--accent);word-break:break-word;}
+button{font:inherit;}
+[hidden]{display:none !important;}
+
+/* ============ Startbildschirm ============ */
+.start{max-width:780px;margin:0 auto;padding:2.5rem 1.4rem 5rem;}
+.start h1{font-size:1.9rem;margin:0 0 .3rem;}
+.start .lead{color:var(--muted);margin:0 0 2rem;font-size:1.02rem;}
+.card{border:1px solid var(--line);border-radius:12px;padding:1.2rem 1.4rem;margin:1rem 0;background:var(--softer);}
+.card h2{font-size:1.05rem;margin:0 0 .7rem;color:var(--accent);}
+ol.steps{margin:0;padding-left:1.3rem;}
+ol.steps li{margin:.45rem 0;}
+ol.steps code, .kbd{background:#fff;border:1px solid var(--line);border-radius:4px;padding:.05em .35em;font-size:.9em;}
+.hinweis{border-left:4px solid var(--evtl);background:var(--evtl-soft);border-radius:0 8px 8px 0;
+ padding:.8rem 1rem;margin:1rem 0;font-size:.94rem;}
+.hinweis b{color:#7a5310;}
+ol.steps .mini{display:inline-block;margin-top:.1rem;}
+/* Hinweisleiste ganz oben (Vorschau erkannt / kein Speicher verfügbar) */
+.envwarn{display:flex;gap:.7rem;align-items:flex-start;padding:.65rem 1rem;font-size:.9rem;
+ border-bottom:1px solid;line-height:1.45;}
+.envwarn.bad{background:var(--warn-soft);border-color:var(--warn);color:#7a1a14;}
+.envwarn.tip{background:var(--evtl-soft);border-color:var(--evtl);color:#6b4a0f;}
+.envwarn span{flex:1;}
+.envwarn .envclose{flex:none;border:none;background:none;cursor:pointer;font-size:15px;
+ color:inherit;opacity:.55;padding:0 .2rem;}
+.envwarn .envclose:hover{opacity:1;}
+.card.help{margin-top:2rem;}
+.card.bsp{border-color:var(--evtl);background:var(--evtl-soft);}
+.card.bsp h2{color:#7a5310;}
+.card.bsp .bsprow{display:flex;gap:.5rem;flex-wrap:wrap;margin:.7rem 0;}
+.card.bsp .bsprow button{border:1px solid #7a5310;background:#fff;color:#7a5310;
+ border-radius:8px;padding:.5rem .9rem;font-size:.95rem;cursor:pointer;}
+.card.bsp .bsprow button:hover{background:#fff6e6;}
+.card.bsp .bsprow button small{display:block;font-weight:400;opacity:.75;font-size:.8em;}
+.card.bsp .bspwarn{font-size:.9rem;margin:.6rem 0 0;}
+ul.helplist{margin:0 0 .8rem;padding-left:1.1rem;font-size:.93rem;}
+ul.helplist li{margin:.5rem 0;}
+main .card.help{margin-top:3rem;background:var(--soft);}
+.drop{border:2px dashed var(--accent);border-radius:12px;background:var(--accent-soft);
+ padding:2rem 1.4rem;text-align:center;margin:1.4rem 0 .6rem;transition:background .15s;}
+.drop.over{background:#ecd7da;}
+.drop p{margin:.3rem 0;}
+.drop .big{font-size:1.05rem;font-weight:600;}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:8px;
+ padding:.55rem 1.1rem;cursor:pointer;font-size:.95rem;}
+.btn:hover{filter:brightness(1.08);}
+.btn.ghost{background:#fff;color:var(--accent);}
+.btn.ghost:hover{background:var(--accent-soft);filter:none;}
+.err{color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn);border-radius:8px;
+ padding:.7rem .9rem;margin:.8rem 0;font-size:.93rem;}
+.mini{font-size:.86rem;color:var(--muted);}
+
+/* ============ Topbar ============ */
+.bar{position:sticky;top:0;z-index:40;min-height:var(--bar);display:flex;gap:.45rem;align-items:center;
+ flex-wrap:wrap;padding:.4rem .8rem;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);
+ border-bottom:1px solid var(--line);}
+.bar .brand{font-weight:700;color:var(--accent);white-space:nowrap;}
+.bar input[type=search]{flex:1;min-width:150px;max-width:360px;padding:.4rem .75rem;
+ border:1px solid var(--line);border-radius:20px;font-size:14px;}
+.bar button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:.38rem .65rem;
+ font-size:13px;cursor:pointer;white-space:nowrap;}
+.bar button:hover{background:var(--soft);}
+.bar button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+.bar .hits{color:var(--muted);font-size:12px;white-space:nowrap;}
+.langbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:.38rem .65rem;
+ font-size:13px;cursor:pointer;white-space:nowrap;}
+.langbtn:hover{background:var(--soft);}
+.start .langbtn{float:right;margin-left:1rem;}
+.bar .spacer{flex:1;}
+#planBtn{border-color:var(--accent);color:var(--accent);font-weight:600;}
+#planBtn .cnt{display:inline-block;min-width:1.4em;text-align:center;background:var(--accent);color:#fff;
+ border-radius:10px;padding:0 .35em;margin-left:.3em;font-size:12px;}
+
+/* Filterleiste */
+.filters{position:sticky;top:var(--barh,var(--bar));z-index:35;display:flex;gap:.4rem;align-items:center;
+ flex-wrap:wrap;padding:.4rem .8rem;background:var(--soft);border-bottom:1px solid var(--line);font-size:13px;}
+.filters .lbl{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin-right:.1rem;}
+.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:.2rem .7rem;cursor:pointer;font-size:12.5px;}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+.chip.off{opacity:.5;text-decoration:line-through;}
+#srcBtn{border-color:var(--accent);color:var(--accent);}
+#srcBtn.on{color:#fff;}
+
+/* Liste der geladenen Verzeichnisse */
+.srcpanel{position:sticky;top:calc(var(--barh,var(--bar)) + var(--filterh,38px));z-index:34;
+ background:#fff;border-bottom:1px solid var(--line);padding:.7rem 1rem;
+ box-shadow:0 6px 14px rgba(0,0,0,.07);}
+.srcpanel h3{margin:0 0 .5rem;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+ color:var(--muted);}
+.srcpanel ul{list-style:none;margin:0 0 .6rem;padding:0;font-size:13px;}
+.srcpanel li{display:flex;gap:.6rem;align-items:baseline;padding:.3rem .4rem;border-radius:6px;}
+.srcpanel li:nth-child(odd){background:var(--softer);}
+.srcpanel .snm{flex:1;min-width:0;}
+.srcpanel .snm b{font-weight:700;}
+.srcpanel .sdet{color:var(--muted);font-size:12px;}
+.srcpanel .sonly,.srcpanel .srm{border:1px solid var(--line);background:#fff;border-radius:6px;
+ cursor:pointer;font-size:11.5px;padding:.12rem .45rem;flex:none;}
+.srcpanel .srm{color:var(--warn);border-color:var(--warn);}
+.srcpanel .sonly:hover{background:var(--soft);}
+.srcpanel .srm:hover{background:var(--warn-soft);}
+.srcpanel .srow{display:flex;gap:.4rem;flex-wrap:wrap;}
+.srcpanel .srow button{border:1px solid var(--accent);background:var(--accent);color:#fff;
+ border-radius:7px;padding:.35rem .7rem;font-size:13px;cursor:pointer;}
+.srcpanel .srow button.ghost{background:#fff;color:var(--accent);}
+@media print{.srcpanel{display:none !important;}}
+
+/* ============ Layout ============ */
+.wrap{display:flex;align-items:flex-start;}
+.toc{position:sticky;top:calc(var(--barh,var(--bar)) + var(--filterh,38px));width:var(--side);flex:none;
+ height:calc(100vh - var(--barh,var(--bar)) - var(--filterh,38px));overflow:auto;border-right:1px solid var(--line);
+ padding:.8rem .4rem 3rem;background:var(--soft);font-size:13px;}
+.toc h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:.2rem .6rem .5rem;}
+.toc a{display:block;padding:.2rem .6rem;border-radius:6px;color:var(--fg);text-decoration:none;line-height:1.35;}
+.toc a:hover{background:#fff;}
+.toc a.lvl1{font-weight:700;margin-top:.5rem;}
+.toc a.lvl2{padding-left:1.1rem;}
+.toc a.lvl3{padding-left:1.9rem;color:var(--muted);}
+.toc a.lvl4,.toc a.lvl5{padding-left:2.6rem;color:var(--muted);font-size:12px;}
+.toc a .c{color:var(--muted);font-weight:400;font-size:11px;}
+.toc a.sec-hidden{opacity:.45;text-decoration:line-through;}
+main{flex:1;min-width:0;max-width:920px;margin:0 auto;padding:1.3rem 1.6rem 6rem;}
+.doc-h1{font-size:1.65rem;margin:.2rem 0 .1rem;}
+.doc-sub{color:var(--muted);margin-bottom:1.3rem;font-size:.94rem;}
+.stand{font-size:.88rem;}
+.stand.alt{color:#7a5310;background:var(--evtl-soft);border:1px solid var(--evtl);
+ border-radius:6px;padding:.15rem .45rem;display:inline-block;margin-top:.25rem;}
+
+/* ============ Sections ============ */
+.sec{margin:.2rem 0;}
+.sec-head{display:flex;align-items:baseline;gap:.5rem;padding:.35rem 0;border-bottom:1px solid var(--line);}
+.sec-head .ttl{cursor:pointer;flex:1;display:flex;align-items:baseline;gap:.5rem;min-width:0;}
+.sec[data-lvl="1"]>.sec-head{border-bottom:2px solid var(--accent);margin-top:1.6rem;}
+.sec[data-lvl="2"]>.sec-head{border-bottom:1px solid var(--accent);margin-top:1rem;}
+.caret{color:var(--muted);font-size:.8em;width:1em;flex:none;transition:transform .12s;}
+.sec.collapsed>.sec-head .caret{transform:rotate(-90deg);}
+.sec-title{margin:0;font-weight:700;color:var(--accent);}
+.sec[data-lvl="1"]>.sec-head .sec-title{font-size:1.28rem;}
+.sec[data-lvl="2"]>.sec-head .sec-title{font-size:1.1rem;}
+.sec[data-lvl="3"]>.sec-head .sec-title{font-size:1rem;}
+.sec[data-lvl="4"]>.sec-head .sec-title,.sec[data-lvl="5"]>.sec-head .sec-title{font-size:.95rem;color:#333;}
+.sec-count{flex:none;color:var(--muted);font-size:12px;background:var(--soft);
+ border:1px solid var(--line);border-radius:10px;padding:0 .5em;}
+.sec-hide{flex:none;border:none;background:none;color:var(--muted);cursor:pointer;font-size:12px;
+ padding:.1rem .35rem;border-radius:5px;opacity:0;}
+.sec-head:hover .sec-hide{opacity:1;}
+.sec-hide:hover{background:var(--warn-soft);color:var(--warn);}
+.sec-body{padding:.3rem 0 .3rem .3rem;}
+.sec.collapsed>.sec-body{display:none;}
+.sec.userhidden{display:none;}
+body.show-hidden .sec.userhidden{display:block;opacity:.5;}
+body.show-hidden .sec.userhidden>.sec-head{background:repeating-linear-gradient(45deg,transparent,transparent 6px,var(--soft) 6px,var(--soft) 12px);}
+.rubrik-info{color:var(--muted);font-size:.9rem;border-left:3px solid var(--line);padding-left:.8rem;margin:.4rem 0 .8rem;}
+.rubrik-info p{margin:.3rem 0;}
+
+/* ============ Kurskarte ============ */
+article.kurs{border:1px solid var(--line);border-radius:8px;padding:.7rem .9rem;margin:.5rem 0;background:var(--softer);}
+article.kurs.st-fest{border-color:var(--fest);background:var(--fest-soft);}
+article.kurs.st-evtl{border-color:var(--evtl);background:var(--evtl-soft);}
+article.kurs.st-raus{display:none;}
+body.show-hidden article.kurs.st-raus{display:block;opacity:.45;background:var(--soft);}
+.kurs-top{display:flex;gap:.6rem;align-items:flex-start;}
+.kurs-titel{font-size:1rem;margin:0;flex:1;min-width:0;}
+.kurs-titel .nr{display:inline-block;font-weight:400;color:#fff;background:var(--accent);border-radius:4px;
+ padding:0 .4rem;font-size:.75rem;vertical-align:.09rem;margin-right:.15rem;}
+.seg{flex:none;display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:#fff;}
+.seg button{border:none;background:none;padding:.25rem .5rem;font-size:12px;cursor:pointer;
+ border-right:1px solid var(--line);color:var(--muted);white-space:nowrap;}
+.seg button:last-child{border-right:none;}
+.seg button:hover{background:var(--soft);}
+.seg button.on[data-st="fest"]{background:var(--fest);color:#fff;}
+.seg button.on[data-st="vielleicht"]{background:var(--evtl);color:#fff;}
+.seg button.on[data-st="raus"]{background:var(--muted);color:#fff;}
+p.meta{margin:.35rem 0 .35rem;color:#333;font-size:.87rem;}
+ul.termine{margin:.3rem 0 .4rem;padding-left:1.1rem;font-size:.87rem;}
+ul.termine li{margin:.1rem 0;}
+.termin-extra{color:var(--muted);}
+.badge{display:inline-block;font-size:11px;border-radius:5px;padding:.05em .45em;margin-right:.3rem;
+ border:1px solid var(--line);background:#fff;color:var(--muted);vertical-align:.1em;}
+.badge.anm{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
+.badge.frist{border-color:var(--evtl);color:#7a5310;background:var(--evtl-soft);}
+.badge.quelle{border-style:dashed;}
+.clashwarn{font-size:.83rem;color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn);
+ border-radius:6px;padding:.25rem .5rem;margin:.3rem 0;}
+.block{margin:.45rem 0 .15rem;font-size:.89rem;}
+.block-label{display:block;font-weight:700;font-size:.67rem;letter-spacing:.06em;text-transform:uppercase;
+ color:var(--muted);margin-bottom:.1rem;}
+.block p{margin:.3rem 0;}
+.block ul,.block ol{margin:.3rem 0;padding-left:1.3rem;}
+body.compact article.kurs:not(.showdesc) .block, body.compact .rubrik-info{display:none;}
+.desc-toggle{display:none;border:1px solid var(--line);background:#fff;border-radius:6px;
+ color:var(--muted);font-size:12px;cursor:pointer;padding:.15rem .5rem;margin:.3rem 0 0;}
+body.compact article.kurs.hasdesc .desc-toggle{display:inline-block;}
+.desc-toggle:hover{background:var(--soft);color:var(--fg);}
+.note-wrap{margin:.4rem 0 .1rem;}
+.note-wrap textarea{width:100%;border:1px dashed var(--line);border-radius:6px;padding:.35rem .5rem;
+ font:inherit;font-size:.86rem;resize:vertical;min-height:2.1em;background:#fff;}
+.note-wrap textarea:focus{border-style:solid;border-color:var(--accent);outline:none;}
+.note-toggle{border:none;background:none;color:var(--muted);font-size:12px;cursor:pointer;padding:.1rem .3rem;}
+.note-toggle:hover{color:var(--accent);}
+.hidden{display:none !important;}
+mark{background:#ffe9a8;padding:0 .1em;}
+
+/* ============ Stundenplan ============ */
+.plan{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.35);display:none;}
+.plan.open{display:block;}
+.plan-inner{position:absolute;inset:2vh 2vw;background:#fff;border-radius:12px;display:flex;flex-direction:column;
+ box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;}
+.plan-bar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.6rem 1rem;border-bottom:1px solid var(--line);}
+.plan-bar h2{margin:0;font-size:1.08rem;}
+.plan-bar .spacer{flex:1;}
+.plan-bar button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:.35rem .65rem;
+ cursor:pointer;font-size:13px;}
+.plan-bar button:hover{background:var(--soft);}
+.plan-bar button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+.plan-body{flex:1;overflow:auto;padding:1rem;}
+.scrollhint{display:none;color:var(--muted);font-size:12px;margin:0 0 .4rem;}
+.tagnav{display:flex;align-items:center;gap:.6rem;margin:0 0 .5rem;}
+.tagnav b{font-size:1rem;min-width:6.5em;}
+.tagnav button{border:1px solid var(--line);background:#fff;border-radius:7px;
+ padding:.25rem .7rem;cursor:pointer;font-size:14px;}
+.tagnav button:disabled{opacity:.35;cursor:default;}
+.tagnav button:not(:disabled):hover{background:var(--soft);}
+.sums{display:flex;gap:.5rem;flex-wrap:wrap;margin:0 0 .7rem;}
+.sum{border:1px solid var(--line);border-radius:8px;padding:.35rem .7rem;background:var(--softer);font-size:13px;}
+.sum b{font-size:1.05rem;display:block;line-height:1.2;}
+.sum.fest b{color:var(--fest);} .sum.evtl b{color:var(--evtl);}
+.conflict-note{color:var(--warn);font-weight:600;margin:0 0 .6rem;font-size:.92rem;}
+.ortwarn{border:1px solid var(--evtl);background:var(--evtl-soft);border-radius:8px;
+ padding:.55rem .8rem;margin:0 0 .7rem;font-size:.88rem;color:#6b4a0f;}
+.ortwarn b{display:block;margin-bottom:.2rem;}
+.ortwarn.divwarn{border-color:var(--warn);background:var(--warn-soft);color:#7a1a14;}
+.ortwarn ul{margin:.2rem 0;padding-left:1.1rem;}
+.ortwarn li{margin:.25rem 0;}
+.empty-note{color:var(--muted);}
+.grid{display:grid;grid-template-columns:52px repeat(var(--days,6),1fr);gap:1px;background:var(--line);
+ border:1px solid var(--line);min-width:640px;}
+.grid>div{background:#fff;}
+.gh{background:#fff;font-weight:700;text-align:center;padding:.35rem 0;font-size:13px;}
+.gtime{font-size:11px;color:var(--muted);text-align:right;padding:.1rem .35rem 0 0;}
+.gcol{position:relative;}
+.evt{position:absolute;border-radius:5px;padding:2px 4px;font-size:11px;line-height:1.22;overflow:hidden;
+ background:var(--fest-soft);border:1px solid var(--fest);}
+.evt.evtl{background:var(--evtl-soft);border-color:var(--evtl);border-style:dashed;}
+.evt.clash{background:var(--warn-soft);border-color:var(--warn);}
+.evt.softclash{box-shadow:inset 0 0 0 2px #f3c9a0;}
+.evt.blockterm{border-style:dotted;}
+.evt.eigen{background:var(--ecs,#eeeef1);border-color:var(--ec,#4a4a52);cursor:pointer;}
+.evt.eigen:hover{filter:brightness(.96);}
+
+/* Formular für eigene Termine */
+.eigenform{border-bottom:1px solid var(--line);background:var(--softer);padding:.7rem 1rem;}
+.ef-row{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin:.25rem 0;}
+.eigenform input,.eigenform select{border:1px solid var(--line);border-radius:7px;
+ padding:.35rem .5rem;font:inherit;font-size:13px;background:#fff;}
+.eigenform input:focus,.eigenform select:focus{outline:none;border-color:var(--accent);}
+#efTitel{flex:1;min-width:180px;}
+#efRaum{flex:1;min-width:130px;}
+#efNotiz{flex:1;min-width:160px;}
+.ef-colors{display:flex;gap:.25rem;}
+.ef-colors button{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;}
+.ef-colors button.on{border-color:var(--fg);}
+.eigenform .btn{padding:.35rem .8rem;font-size:13px;}
+.eigenform .lnk{border:none;background:none;cursor:pointer;font-size:13px;color:var(--muted);}
+.eigenform .lnk:hover{color:var(--fg);}
+.eigenform .lnk.del{color:var(--warn);}
+.ef-err{color:var(--warn);font-size:12.5px;}
+.plan-list .eig-rm{border:none;background:none;color:var(--warn);cursor:pointer;font-size:12px;}
+.plan-list .eig-ed{border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;
+ font-size:11.5px;padding:.1rem .4rem;}
+.evt b{display:block;font-weight:700;}
+.evt small{color:var(--muted);}
+.plan-list{margin-top:1.2rem;font-size:13px;}
+.plan-list h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:.9rem 0 .3rem;}
+.plan-list ul{list-style:none;margin:0;padding:0;}
+.plan-list li{margin:.15rem 0;padding:.25rem .4rem;border-radius:6px;display:flex;gap:.5rem;align-items:center;}
+.plan-list li:nth-child(odd){background:var(--softer);}
+.plan-list li .nm{flex:1;min-width:0;}
+.plan-list .dot{width:.6em;height:.6em;border-radius:50%;flex:none;}
+.plan-list .dot.fest{background:var(--fest);} .plan-list .dot.evtl{background:var(--evtl);}
+.plan-list .rm{border:none;background:none;color:var(--warn);cursor:pointer;font-size:12px;}
+.plan-list .sw{border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:11.5px;padding:.1rem .4rem;}
+
+#tocBtn{display:none;font-size:16px;line-height:1;padding:.3rem .55rem;}
+.tocback{display:none;}
+.toctools{display:none;flex-wrap:wrap;gap:.3rem;padding:0 .5rem .7rem;
+ border-bottom:1px solid var(--line);margin-bottom:.6rem;}
+.toctools button{border:1px solid var(--line);background:#fff;border-radius:7px;
+ padding:.42rem .65rem;font-size:12.5px;cursor:pointer;}
+.toctools button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+@media(max-width:880px){
+ /* Seitenleiste wird zur Schublade über dem Inhalt */
+ #tocBtn{display:block;}
+ .toc{position:fixed;left:0;top:0;bottom:0;z-index:70;width:min(84vw,310px);height:auto;
+  box-shadow:4px 0 24px rgba(0,0,0,.25);transform:translateX(-102%);
+  transition:transform .18s ease;padding-top:1rem;}
+ .toc.open{transform:none;}
+ .tocback{display:block;position:fixed;inset:0;z-index:69;background:rgba(0,0,0,.35);}
+ .toc a{padding:.45rem .7rem;}            /* größere Tippflächen */
+ .toc a.lvl4,.toc a.lvl5{font-size:12.5px;}
+
+ main{padding:1rem .8rem 5rem;max-width:none;}
+ html{font-size:15.5px;}
+ body{overflow-x:hidden;}
+ .bar{gap:.35rem;padding:.35rem .5rem;}
+ .bar input[type=search]{min-width:110px;order:-1;flex:1 1 100%;}
+ .bar .brand{display:none;}
+ .bar button{padding:.42rem .6rem;}
+ /* Filter in eine seitlich schiebbare Zeile statt über mehrere Reihen */
+ .filters{padding:.35rem .5rem;gap:.3rem;flex-wrap:nowrap;overflow-x:auto;
+  scrollbar-width:none;}
+ .filters::-webkit-scrollbar{display:none;}
+ .filters>*{flex:none;}
+ .filters .lbl,.filters .spacer,.filters #hiddenInfo{display:none;}
+ .chip{padding:.3rem .7rem;}
+ /* selten gebrauchte Knöpfe wandern in die Schublade */
+ .bar #collapseAll,.bar #expandAll,.bar #compactBtn,.bar #printBtn,.bar #newFileBtn{display:none;}
+ .toctools{display:flex;}
+
+ article.kurs{padding:.65rem .7rem;}
+ .kurs-top{flex-wrap:wrap;}
+ .kurs-titel{flex:1 1 100%;}
+ .seg{margin-left:auto;}
+ .seg button{padding:.35rem .6rem;}       /* größere Tippflächen */
+
+ .plan-inner{inset:0;border-radius:0;}
+ .plan-bar{padding:.5rem .6rem;gap:.35rem;}
+ .plan-bar h2{font-size:1rem;width:100%;}
+ .plan-body{padding:.6rem;}
+ .grid{min-width:560px;}
+ .sums{gap:.35rem;} .sum{padding:.3rem .5rem;font-size:12px;}
+ .scrollhint{display:block;}
+}
+
+@media print{
+ @page{size:A4;margin:14mm 12mm;}
+ .bar,.filters,.toc,.seg,.sec-hide,.note-toggle,#planBtn,.start,.envwarn{display:none !important;}
+ .wrap{display:block;}
+ main{max-width:none;margin:0;padding:0;}
+ .sec.collapsed>.sec-body{display:block !important;}
+ .caret{display:none;}
+ article.kurs{break-inside:avoid;background:#fff;}
+ .sec[data-lvl="1"]>.sec-head,.sec[data-lvl="2"]>.sec-head{break-after:avoid;}
+ a{color:var(--fg);text-decoration:none;}
+ body.printing-plan .wrap{display:none;}
+ body.printing-plan .plan{position:static;display:block;background:none;}
+ body.printing-plan .plan-inner{position:static;inset:auto;box-shadow:none;border-radius:0;}
+ body.printing-plan .plan-bar button,body.printing-plan .plan-bar .spacer,
+ body.printing-plan .eigenform{display:none;}
+ body:not(.printing-plan) .plan{display:none !important;}
+}
+</style>
+</head>
+<body>
+
+<div id="envWarn" class="envwarn" hidden></div>
+
+<!-- ══════════════ START / IMPORT ══════════════ -->
+<div class="start" id="screenStart">
+  <button class="langbtn" id="langBtnStart"></button>
+  <h1 data-i18n="start.h1"></h1>
+  <p class="lead" data-i18n="start.lead"></p>
+
+  <div class="card">
+    <h2 data-i18n="start.card1"></h2>
+    <ol class="steps" id="steps"></ol>
+    <p class="mini" style="margin-bottom:0" data-i18n="start.tip"></p>
+  </div>
+
+  <div class="hinweis" data-i18n-html="start.modul"></div>
+
+  <div class="card">
+    <h2 data-i18n="start.card2"></h2>
+    <div class="drop" id="drop">
+      <p class="big" data-i18n="start.drop"></p>
+      <p class="mini" data-i18n="start.or"></p>
+      <p><button class="btn" id="pickBtn" data-i18n="start.pick"></button></p>
+      <input type="file" id="fileInput" accept=".xml,text/xml,application/xml" multiple hidden>
+      <p class="mini" data-i18n="src.hint" style="margin:.6rem 0 0"></p>
+    </div>
+    <div id="startErr" class="err" hidden></div>
+    <p id="resumeRow" hidden><button class="btn ghost" id="resumeBtn"></button></p>
+  </div>
+
+  <div class="card bsp" id="bspCard" hidden></div>
+
+  <div class="card help" id="helpStart"></div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div id="screenApp" hidden>
+  <div class="bar">
+    <button id="tocBtn" data-i18n-title="bar.tocTitle">☰</button>
+    <span class="brand">VVZ</span>
+    <input id="q" type="search" data-i18n-ph="bar.search">
+    <span id="hits" class="hits"></span>
+    <button id="collapseAll" data-i18n="bar.collapse" data-i18n-title="bar.collapseTitle"></button>
+    <button id="expandAll" data-i18n="bar.expand" data-i18n-title="bar.expandTitle"></button>
+    <button id="compactBtn" data-i18n="bar.compact" data-i18n-title="bar.compactTitle"></button>
+    <span class="spacer"></span>
+    <button id="planBtn"><span id="planLbl"></span> <span class="cnt" id="planCnt">0</span></button>
+    <button id="printBtn" data-i18n="bar.print"></button>
+    <button id="newFileBtn" data-i18n="bar.newfile" data-i18n-title="bar.newfileTitle"></button>
+    <button id="langBtn" class="langbtn"></button>
+  </div>
+
+  <div class="filters">
+    <span class="lbl" data-i18n="f.show"></span>
+    <button class="chip" id="fPicked" data-i18n="f.onlyPicked"></button>
+    <button class="chip" id="fHidden" data-i18n="f.showHidden"></button>
+    <span id="hiddenInfo" class="mini"></span>
+    <button class="chip" id="srcBtn" hidden></button>
+    <input type="file" id="addInput" accept=".xml,text/xml,application/xml" multiple hidden>
+    <span class="spacer" style="flex:1"></span>
+    <span class="lbl" id="sgLbl" hidden data-i18n="f.area"></span>
+    <select id="sgSel" hidden></select>
+    <span class="lbl" id="orteLbl" hidden data-i18n="f.location"></span>
+    <span id="orteChips"></span>
+  </div>
+
+  <div class="srcpanel" id="srcPanel" hidden></div>
+
+  <div class="wrap">
+    <div class="tocback" id="tocBack" hidden></div>
+    <nav class="toc" id="toc"><h2>Inhalt</h2></nav>
+    <main>
+      <h1 class="doc-h1" id="docTitle"></h1>
+      <p class="doc-sub" id="docSub"></p>
+      <div id="catalog"></div>
+      <div class="card help" id="helpApp"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ══════════════ STUNDENPLAN ══════════════ -->
+<div class="plan" id="plan">
+  <div class="plan-inner">
+    <div class="plan-bar">
+      <h2 data-i18n="plan.title"></h2>
+      <button id="tEvtl" class="on" data-i18n="plan.evtl" data-i18n-title="plan.evtlTitle"></button>
+      <button id="tBlock" class="on" data-i18n="plan.block" data-i18n-title="plan.blockTitle"></button>
+      <button id="tDay" data-i18n="plan.day" data-i18n-title="plan.dayTitle"></button>
+      <button id="eigenAdd" data-i18n="plan.addOwn" data-i18n-title="plan.addOwnTitle"></button>
+      <span class="spacer"></span>
+      <button id="planPrint" data-i18n="plan.print"></button>
+      <button id="planIcs" data-i18n="plan.ics"></button>
+      <button id="planExport" data-i18n="plan.save"></button>
+      <button id="planImport" data-i18n="plan.load"></button>
+      <button id="planClose" data-i18n="plan.close"></button>
+      <input type="file" id="importInput" accept=".json,application/json" hidden>
+    </div>
+    <div class="eigenform" id="eigenForm" hidden>
+      <div class="ef-row">
+        <input id="efTitel" type="text" data-i18n-ph="ef.titlePh" maxlength="80">
+        <select id="efTag"></select>
+        <input id="efVon" type="time" step="300" title="von">
+        <span>–</span>
+        <input id="efBis" type="time" step="300" title="bis">
+        <input id="efRaum" type="text" data-i18n-ph="ef.roomPh" maxlength="60">
+      </div>
+      <div class="ef-row">
+        <input id="efNotiz" type="text" data-i18n-ph="ef.notePh" maxlength="120">
+        <span class="ef-colors" id="efColors"></span>
+        <button class="btn" id="efSave"></button>
+        <button class="lnk" id="efCancel" data-i18n="ef.cancel"></button>
+        <button class="lnk del" id="efDel" hidden data-i18n="ef.delete"></button>
+        <span class="ef-err" id="efErr"></span>
+      </div>
+    </div>
+    <div class="plan-body" id="planBody"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════
+   KONFIGURATION
+   Trage hier den Login-Link eures Campus-Portals (QIS/HISinOne) ein.
+   Bleibt das Feld leer, wird in der Anleitung ein Platzhalter angezeigt.
+   ═══════════════════════════════════════════════════════════════ */
+var QIS_URL  = "https://studierendenservice.hfmt-koeln.de/";
+var QIS_NAME = "studierendenservice.hfmt-koeln.de";
+
+/* Optionaler Kontakt für Rückfragen zu DIESER Seite (nicht zum Studium).
+   Leer lassen = es wird stattdessen auf die Person verwiesen, von der man
+   die Datei bekommen hat. Beispiel:
+     var KONTAKT_MAIL = "vorname.nachname@stud.hfmt-koeln.de";
+     var KONTAKT_NAME = "Fachschaft EMP/IGP";                              */
+/* Wo läuft die Seite "richtig" gehostet? Dort wird zuverlässig gespeichert,
+   also entfällt der "Erst herunterladen"-Hinweis. Überall sonst — etwa in
+   einer OneDrive-Vorschau — bleibt er stehen. So verhält sich ein und
+   dieselbe Datei an jedem Ort korrekt.
+   Eigene Domain? Hier eintragen, z. B. ['stundenplan.hfmt-koeln.de']. */
+/* Mitgelieferte Beispielverzeichnisse. Die Dateien müssen neben der
+   index.html liegen. "stand" ist das Exportdatum (JJJJ-MM-TT) — daraus
+   speist sich die Altersanzeige, also bei jedem Austausch mitpflegen.
+   Leere Liste = der Beispielbereich erscheint gar nicht erst. */
+var BEISPIELE = [
+  { datei:'beispiel-emp-igp.xml', titel:'EMP / IGP', stand:'2026-10-06' }
+];
+
+var GEHOSTET_HOSTS = [];
+var GEHOSTET = false;          /* true erzwingt "gehostet", egal wo */
+function istGehostet(){
+  if(GEHOSTET) return true;
+  var h=(location.hostname||'').toLowerCase();
+  if(!h) return false;
+  if(/\.github\.io$/.test(h)) return true;
+  if(/\.(pages\.dev|netlify\.app|vercel\.app)$/.test(h)) return true;
+  return GEHOSTET_HOSTS.indexOf(h)>=0;
+}
+
+/* Grobe Mindestzeit in Minuten für einen Standortwechsel zwischen zwei
+   Terminen am selben Tag. Nur ein Richtwert — bei Bedarf anpassen. */
+var WECHSEL_MIN = 60;
+
+var KONTAKT_MAIL = "karl.baylan@stud.hfmt-koeln.de";
+var KONTAKT_NAME = "Karl Baylan";
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SPRACHEN
+   Alle sichtbaren Texte liegen hier. t('schlüssel') holt den Text in
+   der aktiven Sprache; {0}, {1} … werden durch die Argumente ersetzt.
+   Fehlt ein englischer Eintrag, wird der deutsche genommen.
+   ═══════════════════════════════════════════════════════════════ */
+var LANG='de';
+try{ LANG=localStorage.getItem('hfmt-planer:lang')||'de'; }catch(e){}
+if(LANG!=='en') LANG='de';
+
+var TXT={
+de:{
+ 'app.title':'Vorlesungsverzeichnis & Stundenplaner',
+ 'lang.other':'English',
+ 'lang.title':'Switch to English',
+
+ 'start.h1':'Vorlesungsverzeichnis & Stundenplaner',
+ 'start.lead':'Lade dein Vorlesungsverzeichnis als XML-Datei hoch — daraus wird eine durchsuchbare Übersicht, in der du Veranstaltungen markieren und zu einem Stundenplan zusammenstellen kannst. Alles passiert lokal in deinem Browser; es werden keine Daten irgendwohin gesendet.',
+ 'start.card1':'1. XML-Datei herunterladen',
+ 'start.steps':'<li><b>Einloggen</b> im Portal: {LINK}</li>'+
+   '<li>Klicke oben auf <code>Veranstaltungen</code></li>'+
+   '<li>Dann auf <code>Vorlesungsverzeichnis</code></li>'+
+   '<li>Klicke dich durch bis zu deinem Studiengang</li>'+
+   '<li>Neben jeder Zeile im Baum steht ein kleines <b>PDF-Symbol</b> — klicke es in der Ebene an, die du haben willst<br><span class="mini">Das klappt nur eingeloggt: kommt keine Datei, ist deine Sitzung vermutlich abgelaufen — dann neu anmelden.</span></li>'+
+   '<li>Bei <code>Ausgabeformat</code> statt PDF das Format <b>XML</b> auswählen</li>'+
+   '<li>Auf <code>Druckvorlage verwenden und drucken</code> klicken<br><span class="mini">Jetzt dauert es: Bei großen Bäumen kann das ein bis zwei Minuten brauchen. Nicht abbrechen und nicht nochmal klicken.</span></li>'+
+   '<li>Auf der nächsten Seite erscheint <code>Bericht herunterladen / öffnen</code>. Mach darauf einen <b>Rechtsklick</b> und wähle <b>„Link speichern unter…"</b><br><span class="mini">Am Mac: Ctrl gedrückt halten und klicken. Alternativ ganz normal darauf klicken — dann öffnet sich die XML im Browser, und du speicherst sie mit <span class="kbd">⌘S</span> bzw. <span class="kbd">Strg+S</span>. Zur Not den kompletten Text markieren, kopieren und als Datei mit der Endung <code>.xml</code> speichern.</span></li>',
+ 'start.tip':'Tipp: Je weiter oben im Baum du das Symbol anklickst, desto mehr Fächer sind in der Datei. Du kannst hier später alles ausblenden, was du nicht brauchst — also lieber zu viel als zu wenig.',
+ 'start.modul':'<b>Vorher wichtig:</b> Hol dir das <b>Modulhandbuch</b> und den <b>Studienverlaufsplan</b> deines Studiengangs. Dort steht, welche Module du in welchem Semester belegen musst und wie viele ECTS/SWS zusammenkommen müssen. Das Vorlesungsverzeichnis sagt dir nur, <i>was angeboten wird</i> — erst mit dem Modulhandbuch weißt du, <i>was du davon brauchst</i>.',
+ 'start.card2':'2. Datei hier hochladen',
+ 'bsp.title':'Beispiel: {0}','bsp.titlePl':'Beispiele',
+ 'bsp.lead':'Du kannst ein mitgeliefertes Verzeichnis laden, ohne dich einzuloggen — zum Ausprobieren.',
+ 'bsp.load':'{0} laden','bsp.stand':'Stand {0}',
+ 'bsp.warn':'<b>Das ist eine Momentaufnahme und wird nicht gepflegt.</b> Räume, Zeiten und Angebote ändern sich im Semester. Zum Planen lade dir oben deinen eigenen, frischen Export — verbindlich ist ohnehin nur das Portal.',
+ 'bsp.fail':'Das Beispiel konnte nicht geladen werden.',
+ 'start.drop':'XML-Datei(en) hierher ziehen',
+ 'start.or':'oder',
+ 'start.pick':'Datei auswählen',
+ 'start.resume':'Zuletzt geladenes Verzeichnis öffnen: {0}',
+ 'start.noLink':'[Link zum Campus-Portal hier eintragen]',
+
+ 'bar.tocTitle':'Inhaltsverzeichnis',
+ 'bar.search':'Suche: Titel, Nummer, Dozent, Text…',
+ 'bar.collapse':'Einklappen','bar.collapseTitle':'Alle Rubriken zuklappen',
+ 'bar.expand':'Ausklappen','bar.expandTitle':'Alle Rubriken aufklappen',
+ 'bar.compact':'Kompakt','bar.compactTitle':'Beschreibungstexte ausblenden',
+ 'bar.plan':'Stundenplan','bar.print':'Drucken',
+ 'bar.newfile':'Andere Datei','bar.newfileTitle':'Anderes Vorlesungsverzeichnis laden',
+ 'bar.hits':'{0} von {1}',
+
+ 'f.show':'Anzeigen','f.onlyPicked':'Nur meine Auswahl','f.showHidden':'Ausgeblendete zeigen',
+ 'f.area':'Bereich','f.location':'Standort','f.allAreas':'Alle ({0})','f.noLocation':'ohne Angabe',
+ 'f.hidden':'ausgeblendet: {0}',
+ 'f.hiddenSec':'{0} Rubrik','f.hiddenSecPl':'{0} Rubriken',
+ 'f.hiddenCourse':'{0} Veranstaltung','f.hiddenCoursePl':'{0} Veranstaltungen',
+
+ 'src.btn':'Quellen ({0})','src.title':'Geladene Verzeichnisse',
+ 'src.add':'+ Datei hinzufügen','src.replace':'Alle ersetzen',
+ 'src.only':'nur diese','src.courses':'{0} Veranstaltungen',
+ 'src.hint':'Mehrere Dateien gleichzeitig möglich — z. B. zwei Studiengänge.',
+ 'src.dupAsk':'„{0}" ({1}) ist bereits geladen.\n\nOK = alte Fassung ersetzen\nAbbrechen = zusätzlich laden',
+ 'doc.standOldest':'ältester Stand von {0} Dateien: {1}',
+ 'toc.title':'Inhalt',
+ 'sec.hide':'ausblenden','sec.show':'einblenden','sec.hideTitle':'Diese Rubrik ausblenden',
+ 'sec.untitled':'Ohne Titel',
+
+ 'card.untitled':'(ohne Titel)',
+ 'card.sws':'SWS','card.ects':'ECTS','card.maxTn':'max. TN','card.lead':'Leitung:',
+ 'card.fest':'Fest','card.evtl':'Evtl.','card.hide':'✕',
+ 'card.festTitle':'Fest einplanen','card.evtlTitle':'Vielleicht — als Option vormerken',
+ 'card.hideTitle':'Ausblenden (brauche ich nicht)',
+ 'card.noTime':'Termin n. n. b.',
+ 'card.dupes':'{0} identische Termineinträge zusammengefasst',
+ 'card.coursePage':'↗ Kursseite',
+ 'card.regBy':'Anmeldung bis','card.regFrom':'Anmeldung ab',
+ 'card.regTitle':'Automatisch aus dem Text gelesen — im Zweifel die Bemerkung unten lesen',
+ 'card.alsoIn':'↺ steht auch unter {0} weiteren Rubrik','card.alsoInPl':'↺ steht auch unter {0} weiteren Rubriken',
+ 'card.alsoPre':'↺ auch in ',
+ 'card.alsoFileFrag':'{0} weiterer Datei','card.alsoFileFragPl':'{0} weiteren Dateien',
+ 'card.alsoSecFrag':'{0} weiterer Rubrik','card.alsoSecFragPl':'{0} weiteren Rubriken',
+ 'card.clash':'⚠ Überschneidet sich mit: {0}','card.clashMore':' und {0} weiteren',
+ 'card.desc':'▾ Beschreibung','card.descHide':'▴ Beschreibung ausblenden',
+ 'card.note':'✎ Notiz','card.noteAdd':'✎ Notiz hinzufügen',
+ 'card.notePh':'Eigene Notiz (z. B. Anmeldung bis …)',
+
+ 'blk.Kurzkommentar':'Kurzkommentar','blk.Kommentar':'Kommentar','blk.Bemerkung':'Bemerkung',
+ 'blk.Voraussetzung':'Voraussetzungen','blk.Nachweis':'Nachweis','blk.Literatur':'Literatur',
+
+ 'doc.courses':'{0} Veranstaltungen','doc.timed':'{0} mit festem Wochentermin',
+ 'doc.stand':'Stand der Datei: {0}','doc.standToday':' (heute)',
+ 'doc.standDay':' (vor {0} Tag)','doc.standDays':' (vor {0} Tagen)',
+ 'doc.standOld':' — Räume und Zeiten ändern sich im Semester. Lade dir am besten einen frischen Export aus dem Portal.',
+
+ 'plan.title':'Stundenplan',
+ 'plan.evtl':'Vielleicht','plan.evtlTitle':'Vielleicht-Veranstaltungen im Raster zeigen',
+ 'plan.block':'Block/Einzel','plan.blockTitle':'Block- und Einzeltermine im Raster zeigen',
+ 'plan.day':'Tag','plan.dayTitle':'Zwischen Wochen- und Tagesansicht wechseln',
+ 'plan.addOwn':'+ Eigener Termin','plan.addOwnTitle':'Eigenen Termin eintragen (Hauptfach, Üben, Sport …)',
+ 'plan.print':'Drucken / PDF','plan.ics':'Kalender (.ics)','plan.save':'Sichern','plan.load':'Laden',
+ 'plan.close':'Schließen',
+ 'plan.empty':'Noch nichts ausgewählt. Markiere im Verzeichnis Veranstaltungen mit <b>Fest</b> oder <b>Evtl.</b> — sie erscheinen dann hier im Raster. Eigene Termine wie Hauptfach, Üben oder Sport trägst du oben über <b>+ Eigener Termin</b> ein.',
+ 'plan.sumFest':'fest eingeplant','plan.sumEvtl':'vielleicht',
+ 'plan.sumSws':'SWS','plan.sumEcts':'ECTS*','plan.sumEctsNo':' · {0}× ohne Zahl',
+ 'plan.conflict':'⚠ {0} echte Überschneidung zwischen fest eingeplanten Terminen (rot markiert).',
+ 'plan.conflictPl':'⚠ {0} echte Überschneidungen zwischen fest eingeplanten Terminen (rot markiert).',
+ 'plan.divWarn':'⚠ Unterschiedliche Angaben in den geladenen Dateien',
+ 'plan.divItem':'{0} {1} — angezeigt wird die Fassung aus „{2}"',
+ 'plan.divNote':'Diese Veranstaltungen stehen in mehreren Dateien mit abweichenden Zeiten oder Räumen. Gezeigt wird jeweils die Fassung mit Terminangabe, bei Gleichstand die aus der neueren Datei. Im Zweifel im Portal nachsehen.',
+ 'plan.locWarn':'⇄ Standortwechsel mit wenig Puffer',
+ 'plan.locLine':'{0}: {1} bis {2} → {3} ab {4} — nur {5} dazwischen',
+ 'plan.locOverlap':'Überschneidung','plan.locMin':'{0} Min',
+ 'plan.locNote':'Richtwert: unter {0} Minuten wird gewarnt. Prüf die Fahrzeit selbst — je nach Verbindung kann es auch knapper oder entspannter sein.',
+ 'plan.scrollhint':'Das Raster lässt sich seitlich schieben →',
+ 'plan.dayCount':'{0} Termine',
+ 'plan.listFest':'Fest eingeplant ({0})','plan.listEvtl':'Vielleicht ({0})',
+ 'plan.noFixed':'ohne festen Termin',
+ 'plan.toEvtl':'→ Evtl.','plan.toFest':'→ Fest',
+ 'plan.remove':'entfernen','plan.edit':'bearbeiten',
+ 'plan.unsched':'Ohne festen Wochentermin ({0})',
+ 'plan.unschedNote':'Block-/Blockseminare oder Termin noch offen — Details stehen im Verzeichnis in der Bemerkung.',
+ 'plan.own':'Eigene Termine ({0})',
+ 'plan.ownTermin':'eigener Termin',
+ 'plan.dupesTip':'({0}× identisch eingetragen)',
+ 'plan.ectsNote':'* ECTS-Summe zählt nur Einträge mit einer echten Zahl. Viele Veranstaltungen verweisen stattdessen auf das Modulhandbuch — prüfe die Summe dort nach.',
+ 'plan.icsNone':'Keine Veranstaltung mit auswertbarem Wochentermin ausgewählt.',
+ 'plan.importFail':'Diese Datei konnte nicht gelesen werden.',
+ 'ics.maybe':'(evtl.) ',
+
+ 'ef.titlePh':'Titel, z. B. Hauptfach Klavier, Üben, Sport',
+ 'ef.roomPh':'Raum / Ort (optional)','ef.notePh':'Notiz (optional)',
+ 'ef.save':'Eintragen','ef.update':'Übernehmen','ef.cancel':'Abbrechen','ef.delete':'Löschen',
+ 'ef.errTitle':'Bitte einen Titel angeben.','ef.errTime':'Bitte Anfang und Ende angeben.',
+ 'ef.errOrder':'Das Ende muss nach dem Anfang liegen.',
+
+ 'help.title':'Fragen?',
+ 'help.q1':'Welche Veranstaltungen muss ich belegen?',
+ 'help.a1':'Steht im <b>Modulhandbuch</b> und im <b>Studienverlaufsplan</b> deines Studiengangs. Wenn das nicht weiterhilft: Studienberatung bzw. Studiengangsleitung.',
+ 'help.q2':'Fragen zu einer bestimmten Veranstaltung?',
+ 'help.a2':'Direkt an die Lehrenden. Wo eine Anmelde-Adresse hinterlegt ist, steht sie als Knopf ✉ auf der jeweiligen Kurskarte.',
+ 'help.q3':'Bleibt mein Stundenplan gespeichert?',
+ 'help.a3':'Ja — im Browser, auf diesem Gerät. Du kannst die Seite schließen und später weitermachen. Das klappt aber nur, wenn du die Datei <b>heruntergeladen</b> hast und von deinem Rechner öffnest; in einer Online-Vorschau (OneDrive, Mail-Anhang) geht die Auswahl verloren. Für den Wechsel auf ein anderes Gerät: im Stundenplan auf <b>Sichern</b>, die Datei mitnehmen, dort auf <b>Laden</b>.',
+ 'help.q4':'Etwas an dieser Seite funktioniert nicht?',
+ 'help.mail':'Schreib mir eine Mail: ','help.ask':'Wende dich an {0}',
+ 'help.askNone':'Wende dich an die Person, von der du diese Datei bekommen hast',
+ 'help.disclaimer':'Inoffizielles Hilfsmittel, ohne Gewähr — die Daten kommen aus der XML-Datei, die du hochgeladen hast, und können veraltet sein. Verbindlich ist immer das Vorlesungsverzeichnis im Portal.',
+
+ 'env.bad':'<b>Hier kann nichts gespeichert werden.</b> Du siehst die Seite offenbar in einer Vorschau. Alles, was du jetzt anklickst, ist beim Schließen weg. <b>Lade die Datei zuerst herunter</b> und öffne sie von deinem Rechner — dann merkt sie sich deinen Stundenplan.',
+ 'env.tip':'<b>Erst herunterladen, dann planen.</b> Du öffnest die Seite gerade über eine Vorschau bzw. einen Link. Wenn du die Datei herunterlädst und von deinem Rechner öffnest, bleibt dein Stundenplan gespeichert — du kannst die Seite schließen und später weitermachen. Eine Auswahl, die du <i>hier</i> triffst, wird beim Herunterladen <b>nicht</b> übernommen.',
+ 'env.close':'Hinweis ausblenden',
+
+ 'err.notXml':'Die Datei ließ sich nicht als XML lesen. Ist es wirklich die XML-Ausgabe aus dem Portal?',
+ 'err.noTree':'Das sieht nicht nach einem Vorlesungsverzeichnis aus — der Abschnitt <Tree> fehlt. Bitte im Portal als Ausgabeformat XML wählen (nicht PDF oder HTML).',
+ 'err.noCourses':'In der Datei wurden keine Veranstaltungen gefunden.',
+ 'err.tooBig':'Die Datei ist ungewöhnlich groß (>60 MB).',
+ 'err.unreadable':'Die Datei konnte nicht gelesen werden.',
+
+ 'day.Mo':'Mo','day.Di':'Di','day.Mi':'Mi','day.Do':'Do','day.Fr':'Fr','day.Sa':'Sa','day.So':'So',
+ 'dayL.Mo':'Montag','dayL.Di':'Dienstag','dayL.Mi':'Mittwoch','dayL.Do':'Donnerstag',
+ 'dayL.Fr':'Freitag','dayL.Sa':'Samstag','dayL.So':'Sonntag'
+},
+en:{
+ 'app.title':'Course Catalogue & Timetable Planner',
+ 'lang.other':'Deutsch',
+ 'lang.title':'Auf Deutsch umschalten',
+
+ 'start.h1':'Course Catalogue & Timetable Planner',
+ 'start.lead':'Upload your course catalogue as an XML file — it turns into a searchable overview where you can mark courses and build a timetable. Everything happens locally in your browser; no data is sent anywhere.',
+ 'start.card1':'1. Download the XML file',
+ 'start.steps':'<li><b>Log in</b> to the portal: {LINK}</li>'+
+   '<li>Click <code>Courses</code> at the top</li>'+
+   '<li>Then <code>Course Overview</code></li>'+
+   '<li>Click your way down to your degree programme</li>'+
+   '<li>Next to every line of the tree there is a small <b>PDF icon</b> — click it at the level you want<br><span class="mini">This only works while logged in: if no file appears, your session has probably expired — just log in again.</span></li>'+
+   '<li>Under <code>Output format</code> choose <b>XML</b> instead of PDF</li>'+
+   '<li>Click <code>Use master and print</code><br><span class="mini">This takes a while: with large trees it can need one or two minutes. Do not cancel and do not click again.</span></li>'+
+   '<li>The next page shows <code>Download report</code>. <b>Right-click</b> it and choose <b>“Save link as…”</b><br><span class="mini">On a Mac: hold Ctrl and click. Alternatively just click it normally — the XML opens in the browser and you save it with <span class="kbd">⌘S</span> or <span class="kbd">Ctrl+S</span>. As a last resort, select the whole text, copy it and save it as a file ending in <code>.xml</code>.</span></li>',
+ 'start.tip':'Tip: the higher up the tree you click the icon, the more subjects end up in the file. You can hide anything you do not need later on — so rather too much than too little.',
+ 'start.modul':'<b>Important first:</b> get the <b>module handbook</b> and the <b>study plan</b> for your degree programme. They tell you which modules you have to take in which semester and how many ECTS/hours you need. The course catalogue only tells you <i>what is on offer</i> — only the module handbook tells you <i>what you actually need</i>.',
+ 'start.card2':'2. Upload the file here',
+ 'bsp.title':'Example: {0}','bsp.titlePl':'Examples',
+ 'bsp.lead':'You can load a bundled catalogue without logging in — just to try things out.',
+ 'bsp.load':'Load {0}','bsp.stand':'as of {0}',
+ 'bsp.warn':'<b>This is a snapshot and is not kept up to date.</b> Rooms, times and offerings change during the semester. For actual planning, download your own fresh export above — the portal is the authoritative source anyway.',
+ 'bsp.fail':'The example could not be loaded.',
+ 'start.drop':'Drag your XML file(s) here',
+ 'start.or':'or',
+ 'start.pick':'Choose file',
+ 'start.resume':'Open the catalogue you loaded last: {0}',
+ 'start.noLink':'[enter the campus portal link here]',
+
+ 'bar.tocTitle':'Table of contents',
+ 'bar.search':'Search: title, number, lecturer, text…',
+ 'bar.collapse':'Collapse','bar.collapseTitle':'Collapse all sections',
+ 'bar.expand':'Expand','bar.expandTitle':'Expand all sections',
+ 'bar.compact':'Compact','bar.compactTitle':'Hide description texts',
+ 'bar.plan':'Timetable','bar.print':'Print',
+ 'bar.newfile':'Other file','bar.newfileTitle':'Load a different course catalogue',
+ 'bar.hits':'{0} of {1}',
+
+ 'f.show':'Show','f.onlyPicked':'My selection only','f.showHidden':'Show hidden',
+ 'f.area':'Area','f.location':'Location','f.allAreas':'All ({0})','f.noLocation':'not stated',
+ 'f.hidden':'hidden: {0}',
+ 'f.hiddenSec':'{0} section','f.hiddenSecPl':'{0} sections',
+ 'f.hiddenCourse':'{0} course','f.hiddenCoursePl':'{0} courses',
+
+ 'src.btn':'Sources ({0})','src.title':'Loaded catalogues',
+ 'src.add':'+ Add file','src.replace':'Replace all',
+ 'src.only':'only this one','src.courses':'{0} courses',
+ 'src.hint':'Several files at once are fine — e.g. two degree programmes.',
+ 'src.dupAsk':'“{0}” ({1}) is already loaded.\n\nOK = replace the old version\nCancel = load it in addition',
+ 'doc.standOldest':'oldest of {0} files: {1}',
+ 'toc.title':'Contents',
+ 'sec.hide':'hide','sec.show':'show','sec.hideTitle':'Hide this section',
+ 'sec.untitled':'Untitled',
+
+ 'card.untitled':'(untitled)',
+ 'card.sws':'hrs/week','card.ects':'ECTS','card.maxTn':'max. participants','card.lead':'Taught by:',
+ 'card.fest':'Firm','card.evtl':'Maybe','card.hide':'✕',
+ 'card.festTitle':'Plan this one firmly','card.evtlTitle':'Maybe — keep as an option',
+ 'card.hideTitle':'Hide (not relevant for me)',
+ 'card.noTime':'Time t.b.a.',
+ 'card.dupes':'{0} identical time entries merged',
+ 'card.coursePage':'↗ Course page',
+ 'card.regBy':'Register by','card.regFrom':'Registration opens',
+ 'card.regTitle':'Read automatically from the text — when in doubt check the notes below',
+ 'card.alsoIn':'↺ also listed under {0} other section','card.alsoInPl':'↺ also listed under {0} other sections',
+ 'card.alsoPre':'↺ also in ',
+ 'card.alsoFileFrag':'{0} other file','card.alsoFileFragPl':'{0} other files',
+ 'card.alsoSecFrag':'{0} other section','card.alsoSecFragPl':'{0} other sections',
+ 'card.clash':'⚠ Clashes with: {0}','card.clashMore':' and {0} more',
+ 'card.desc':'▾ Description','card.descHide':'▴ Hide description',
+ 'card.note':'✎ Note','card.noteAdd':'✎ Add note',
+ 'card.notePh':'Your own note (e.g. register by …)',
+
+ 'blk.Kurzkommentar':'Summary','blk.Kommentar':'Comment','blk.Bemerkung':'Notes',
+ 'blk.Voraussetzung':'Prerequisites','blk.Nachweis':'Assessment','blk.Literatur':'Reading',
+
+ 'doc.courses':'{0} courses','doc.timed':'{0} with a fixed weekly slot',
+ 'doc.stand':'File date: {0}','doc.standToday':' (today)',
+ 'doc.standDay':' ({0} day ago)','doc.standDays':' ({0} days ago)',
+ 'doc.standOld':' — rooms and times change during the semester. Better download a fresh export from the portal.',
+
+ 'plan.title':'Timetable',
+ 'plan.evtl':'Maybe','plan.evtlTitle':'Show maybe-courses in the grid',
+ 'plan.block':'Block/single','plan.blockTitle':'Show block and single dates in the grid',
+ 'plan.day':'Day','plan.dayTitle':'Switch between week and day view',
+ 'plan.addOwn':'+ Own entry','plan.addOwnTitle':'Add your own entry (main subject, practice, sport …)',
+ 'plan.print':'Print / PDF','plan.ics':'Calendar (.ics)','plan.save':'Save','plan.load':'Load',
+ 'plan.close':'Close',
+ 'plan.empty':'Nothing selected yet. Mark courses in the catalogue as <b>Firm</b> or <b>Maybe</b> — they will show up in the grid. Your own entries such as main subject, practice or sport go in via <b>+ Own entry</b> above.',
+ 'plan.sumFest':'planned firmly','plan.sumEvtl':'maybe',
+ 'plan.sumSws':'hrs/week','plan.sumEcts':'ECTS*','plan.sumEctsNo':' · {0}× without a number',
+ 'plan.conflict':'⚠ {0} real clash between firmly planned entries (marked red).',
+ 'plan.conflictPl':'⚠ {0} real clashes between firmly planned entries (marked red).',
+ 'plan.divWarn':'⚠ The loaded files disagree',
+ 'plan.divItem':'{0} {1} — showing the version from “{2}”',
+ 'plan.divNote':'These courses appear in several files with differing times or rooms. The version that actually has a time is shown; if both do, the one from the newer file. Check the portal if in doubt.',
+ 'plan.locWarn':'⇄ Change of location with little buffer',
+ 'plan.locLine':'{0}: {1} until {2} → {3} from {4} — only {5} in between',
+ 'plan.locOverlap':'an overlap','plan.locMin':'{0} min',
+ 'plan.locNote':'Rule of thumb: a warning appears below {0} minutes. Check the travel time yourself — depending on the connection it may be tighter or easier.',
+ 'plan.scrollhint':'The grid can be scrolled sideways →',
+ 'plan.dayCount':'{0} entries',
+ 'plan.listFest':'Planned firmly ({0})','plan.listEvtl':'Maybe ({0})',
+ 'plan.noFixed':'no fixed time',
+ 'plan.toEvtl':'→ Maybe','plan.toFest':'→ Firm',
+ 'plan.remove':'remove','plan.edit':'edit',
+ 'plan.unsched':'Without a fixed weekly slot ({0})',
+ 'plan.unschedNote':'Block seminars or time still open — details are in the notes in the catalogue.',
+ 'plan.own':'Own entries ({0})',
+ 'plan.ownTermin':'own entry',
+ 'plan.dupesTip':'({0}× entered identically)',
+ 'plan.ectsNote':'* The ECTS total only counts entries with an actual number. Many courses refer to the module handbook instead — check the total there.',
+ 'plan.icsNone':'No course with a usable weekly slot selected.',
+ 'plan.importFail':'This file could not be read.',
+ 'ics.maybe':'(maybe) ',
+
+ 'ef.titlePh':'Title, e.g. main subject piano, practice, sport',
+ 'ef.roomPh':'Room / place (optional)','ef.notePh':'Note (optional)',
+ 'ef.save':'Add','ef.update':'Apply','ef.cancel':'Cancel','ef.delete':'Delete',
+ 'ef.errTitle':'Please enter a title.','ef.errTime':'Please enter a start and an end.',
+ 'ef.errOrder':'The end must be after the start.',
+
+ 'help.title':'Questions?',
+ 'help.q1':'Which courses do I have to take?',
+ 'help.a1':'That is in the <b>module handbook</b> and the <b>study plan</b> for your degree programme. If that does not help: student advisory service or your programme coordinator.',
+ 'help.q2':'Questions about a particular course?',
+ 'help.a2':'Ask the teaching staff directly. Where a registration address is given, it appears as a ✉ button on that course card.',
+ 'help.q3':'Is my timetable saved?',
+ 'help.a3':'Yes — in your browser, on this device. You can close the page and carry on later. This only works if you have <b>downloaded</b> the file and open it from your own computer; in an online preview (OneDrive, mail attachment) your selection is lost. To move to another device: press <b>Save</b> in the timetable, take the file with you, and press <b>Load</b> there.',
+ 'help.q4':'Something on this page is not working?',
+ 'help.mail':'Send me an email: ','help.ask':'Contact {0}',
+ 'help.askNone':'Contact whoever gave you this file',
+ 'help.disclaimer':'Unofficial tool, no guarantee — the data comes from the XML file you uploaded and may be out of date. The course catalogue in the portal is always the authoritative source.',
+
+ 'env.bad':'<b>Nothing can be saved here.</b> You are apparently viewing this page in a preview. Everything you click now will be gone when you close it. <b>Download the file first</b> and open it from your own computer — then it remembers your timetable.',
+ 'env.tip':'<b>Download first, then plan.</b> You are opening this page via a preview or a link. If you download the file and open it from your own computer, your timetable stays saved — you can close the page and carry on later. A selection you make <i>here</i> will <b>not</b> carry over when you download.',
+ 'env.close':'Hide this notice',
+
+ 'err.notXml':'The file could not be read as XML. Is it really the XML output from the portal?',
+ 'err.noTree':'This does not look like a course catalogue — the <Tree> section is missing. Please choose XML as the output format in the portal (not PDF or HTML).',
+ 'err.noCourses':'No courses were found in the file.',
+ 'err.tooBig':'The file is unusually large (>60 MB).',
+ 'err.unreadable':'The file could not be read.',
+
+ 'day.Mo':'Mon','day.Di':'Tue','day.Mi':'Wed','day.Do':'Thu','day.Fr':'Fri','day.Sa':'Sat','day.So':'Sun',
+ 'dayL.Mo':'Monday','dayL.Di':'Tuesday','dayL.Mi':'Wednesday','dayL.Do':'Thursday',
+ 'dayL.Fr':'Friday','dayL.Sa':'Saturday','dayL.So':'Sunday'
+}};
+
+function t(k){
+  var d=TXT[LANG]||TXT.de;
+  var v=(d[k]!==undefined)?d[k]:TXT.de[k];
+  if(v===undefined) return k;
+  if(arguments.length>1){
+    var a=[].slice.call(arguments,1);
+    v=v.replace(/\{(\d)\}/g,function(m,i){return a[+i]!==undefined?a[+i]:m;});
+  }
+  return v;
+}
+/* Singular/Plural bequem */
+function tn(n,k){ return t(n===1?k:k+'Pl', n); }
+/* Rhythmusangaben aus der XML (immer deutsch) fürs Anzeigen übersetzen.
+   Unbekannte Werte bleiben unverändert stehen. */
+var RHYTH_EN={
+  'wöchentl.':'weekly','wöchentlich':'weekly',
+  'Einzel':'single date','Einzeltermin':'single date',
+  'Block':'block','Blockveranstaltung':'block course',
+  'BlockSaSo':'block incl. Sat/Sun','Blockveranstaltung + Sa und So':'block course incl. Sat/Sun',
+  '14tägl':'fortnightly','14-täglich':'fortnightly','14-tägl.':'fortnightly'};
+function rhythmLang(r){
+  if(LANG!=='en'||!r) return r||'';
+  return RHYTH_EN[r]||r;
+}
+
+/* Wochentagsnamen aus der XML (immer deutsch) fürs Anzeigen übersetzen */
+var XMLTAG={Montag:'Mo',Dienstag:'Di',Mittwoch:'Mi',Donnerstag:'Do',
+            Freitag:'Fr',Samstag:'Sa',Sonntag:'So'};
+function tagLang(name){
+  var k=XMLTAG[name];
+  return k?t('dayL.'+k):name;
+}
+
+/* ═══════════════ Hilfsfunktionen ═══════════════ */
+var $  = function(s,r){return (r||document).querySelector(s);};
+var $$ = function(s,r){return [].slice.call((r||document).querySelectorAll(s));};
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+/* Zwei Normalisierungen für die Suche:
+   normL bewahrt die Zeichenanzahl (ä→a) — nur damit lässt sich zuverlässig
+   hervorheben, weil die Fundstellen im Originaltext liegen müssen.
+   normE schreibt zusätzlich aus (ä→ae) und fängt Schreibweisen wie
+   "Uebung" ab; dort wird dann nicht hervorgehoben. */
+var UML_L={'ä':'a','ö':'o','ü':'u','ß':'s','à':'a','á':'a','â':'a','è':'e','é':'e',
+           'ê':'e','ì':'i','í':'i','ò':'o','ó':'o','ô':'o','ù':'u','ú':'u','ç':'c','ñ':'n'};
+function normL(x){
+  return (x==null?'':String(x)).toLowerCase().replace(/[äöüßàáâèéêìíòóôùúçñ]/g,
+    function(c){return UML_L[c]||c;});
+}
+function normE(x){
+  return (x==null?'':String(x)).toLowerCase()
+    .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss')
+    .replace(/[àáâèéêìíòóôùúçñ]/g,function(c){return UML_L[c]||c;});
+}
+function reEsc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+
+/* ═══════════════ Speicher ═══════════════ */
+var DB='hfmt-planer';
+function idbOpen(){return new Promise(function(res,rej){
+  var r=indexedDB.open(DB,1);
+  r.onupgradeneeded=function(){r.result.createObjectStore('kv');};
+  r.onsuccess=function(){res(r.result);};
+  r.onerror=function(){rej(r.error);};});}
+function idbSet(k,v){return idbOpen().then(function(db){return new Promise(function(res,rej){
+  var tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);
+  tx.oncomplete=function(){res();};tx.onerror=function(){rej(tx.error);};});});}
+function idbGet(k){return idbOpen().then(function(db){return new Promise(function(res,rej){
+  var tx=db.transaction('kv','readonly'),rq=tx.objectStore('kv').get(k);
+  rq.onsuccess=function(){res(rq.result);};rq.onerror=function(){rej(rq.error);};});});}
+
+/* Ein gemeinsamer Schlüssel: Veranstaltungsnummern sind portalweit eindeutig,
+   also bleibt die Auswahl erhalten, wenn Verzeichnisse dazukommen oder wegfallen. */
+var stateKey='hfmt-planer:v2';
+var state={status:{},notes:{},hiddenSections:{},ui:{},eigene:[]};
+/* Früher lag der Zustand je Verzeichnis unter einem eigenen Schlüssel.
+   Einmalig einsammeln, damit niemand seine Auswahl verliert. Rubrik-IDs
+   werden bewusst nicht übernommen — die verschieben sich beim Zusammenführen. */
+function migriereAltenZustand(){
+  try{
+    if(localStorage.getItem(stateKey)) return;
+    var ziel={status:{},notes:{},hiddenSections:{},ui:{},eigene:[]}, gefunden=false;
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(!k || k.indexOf('hfmt-planer:')!==0) continue;
+      if(k===stateKey || k==='hfmt-planer:lang') continue;
+      var alt; try{ alt=JSON.parse(localStorage.getItem(k)); }catch(e){ continue; }
+      if(!alt) continue;
+      gefunden=true;
+      Object.keys(alt.status||{}).forEach(function(x){ziel.status[x]=alt.status[x];});
+      Object.keys(alt.notes||{}).forEach(function(x){ziel.notes[x]=alt.notes[x];});
+      if(Array.isArray(alt.eigene)) alt.eigene.forEach(function(ev){
+        if(!ziel.eigene.some(function(y){return y.id===ev.id;})) ziel.eigene.push(ev);});
+      if(alt.ui) Object.keys(alt.ui).forEach(function(x){
+        if(ziel.ui[x]===undefined) ziel.ui[x]=alt.ui[x];});
+    }
+    if(gefunden) localStorage.setItem(stateKey,JSON.stringify(ziel));
+  }catch(e){}
+}
+migriereAltenZustand();
+
+function loadState(){
+  /* immer erst zurücksetzen, sonst schleppt ein zweites Verzeichnis
+     die Auswahl des ersten mit */
+  state.status={};state.notes={};state.hiddenSections={};state.ui={};state.eigene=[];
+  try{var raw=localStorage.getItem(stateKey);if(raw){var s=JSON.parse(raw);
+    state.status=s.status||{};state.notes=s.notes||{};
+    state.hiddenSections=s.hiddenSections||{};state.ui=s.ui||{};
+    state.eigene=Array.isArray(s.eigene)?s.eigene:[];}}catch(e){}
+}
+var saveTimer=null;
+function saveState(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(function(){
+    try{localStorage.setItem(stateKey,JSON.stringify(state));}catch(e){}
+  },150);
+}
+
+/* ═══════════════ XML → Datenmodell ═══════════════ */
+var ALLOWED={p:1,br:1,strong:1,em:1,b:1,i:1,a:1,ul:1,ol:1,li:1,span:1,div:1,h2:1,h3:1,h4:1};
+var DAYMAP={Montag:'Mo',Dienstag:'Di',Mittwoch:'Mi',Donnerstag:'Do',Freitag:'Fr',Samstag:'Sa',Sonntag:'So'};
+var DAYS=['Mo','Di','Mi','Do','Fr','Sa','So'];
+
+function txt(el,tag){
+  if(!el)return '';
+  var c=el.children,i;
+  for(i=0;i<c.length;i++) if(c[i].nodeName===tag) return (c[i].textContent||'').trim();
+  return '';
+}
+function kids(el,tag){
+  var out=[],c=el?el.children:[],i;
+  for(i=0;i<c.length;i++) if(c[i].nodeName===tag) out.push(c[i]);
+  return out;
+}
+function firstKid(el,tag){var k=kids(el,tag);return k.length?k[0]:null;}
+
+/* <FormattedText> → bereinigtes HTML-Fragment */
+function convertFT(ft){
+  var frag=document.createDocumentFragment();
+  if(!ft) return frag;
+  (function walk(src,dst){
+    var ns=src.childNodes,i,n,tag,e,h;
+    for(i=0;i<ns.length;i++){
+      n=ns[i];
+      if(n.nodeType===3){ if(n.nodeValue) dst.appendChild(document.createTextNode(n.nodeValue)); continue; }
+      if(n.nodeType!==1) continue;
+      tag=n.nodeName.toLowerCase();
+      if(ALLOWED[tag]){
+        e=document.createElement(tag==='b'?'strong':(tag==='i'?'em':tag));
+        if(tag==='a'){
+          h=n.getAttribute('href')||'';
+          if(/^(https?:|mailto:)/i.test(h)){e.setAttribute('href',h);
+            if(/^https?:/i.test(h)){e.setAttribute('target','_blank');e.setAttribute('rel','noopener');}}
+        }
+        walk(n,e); dst.appendChild(e);
+      } else { walk(n,dst); }
+    }
+  })(ft,frag);
+  /* leere Absätze und br-Ketten aufräumen */
+  var wrap=document.createElement('div'); wrap.appendChild(frag);
+  $$('p',wrap).forEach(function(p){
+    if(!p.textContent.replace(/[\s ]/g,'') && !p.querySelector('a,img')) p.remove();
+  });
+  $$('br',wrap).forEach(function(b){
+    var n=b.nextSibling;
+    while(n && ((n.nodeType===3 && !n.nodeValue.replace(/[\s ]/g,'')) ||
+                (n.nodeType===1 && n.nodeName==='BR'))){
+      var nx=n.nextSibling;
+      if(n.nodeType===1) n.remove(); else n.remove();
+      n=nx;
+    }
+  });
+  var f2=document.createDocumentFragment();
+  while(wrap.firstChild) f2.appendChild(wrap.firstChild);
+  return f2;
+}
+function ftHasContent(frag){
+  var d=document.createElement('div'); d.appendChild(frag.cloneNode(true));
+  return !!(d.textContent.replace(/[\s ]/g,'') || d.querySelector('a,ul,ol'));
+}
+
+function parseTermine(v){
+  var out=[];
+  kids(v,'VZeit').forEach(function(z){
+    var dayFull=txt(z,'VZWoTag'), rz=firstKid(z,'VZRaum'), tb=firstKid(z,'TerminBemerkung');
+    var note='';
+    if(tb){ var ft=firstKid(tb,'FormattedText');
+      if(ft) note=(ft.textContent||'').replace(/\s+/g,' ').trim(); }
+    var rec={
+      day:DAYMAP[dayFull]||null, dayFull:dayFull,
+      start:txt(z,'VZBeginn'), end:txt(z,'VZEnde'),
+      rhythm:txt(z,'VZRhyth')||txt(z,'VZRhythmus'),
+      rhythmus:txt(z,'VZRhythmus'),
+      room:(rz?(txt(rz,'RaumLangText')||txt(rz,'VZRaumName')):''),
+      from:txt(z,'VZBeginDat'), to:txt(z,'VZEndDat'), note:note
+    };
+    if(rec.dayFull||rec.start||rec.room||rec.from) out.push(rec);
+  });
+  return out;
+}
+
+var TEXTBLOCKS=['Kurzkommentar','Kommentar','Bemerkung','Voraussetzung','Nachweis','Literatur'];
+
+function personName(p){
+  var vor=txt(p,'DozVorname'), nach=txt(p,'DozName'), zus=txt(p,'Namensbestandteil');
+  return [vor,[zus,nach].filter(Boolean).join(' ')].filter(Boolean).join(' ').trim();
+}
+
+/* Standort-Erkennung: Wörter, die zwar groß geschrieben sind, aber kein Ort sind */
+var ORT_STOP={};
+('raum räume saal säle studio zimmer halle aula gebäude haus hauptgebäude online zoom hörsaal '+
+ 'seminarraum übungsraum probenraum konzertsaal kammermusiksaal foyer keller bibliothek mensa '+
+ 'kirche kapelle turnhalle sporthalle tanzsaal werkstatt labor büro atelier bühne termin nach '+
+ 'siehe ort orte bitte achtung beginn ende absprache anmeldung veranstaltung veranstaltungen '+
+ 'gruppe kurs blockseminar person dozent dozentin').split(' ')
+  .forEach(function(w){ORT_STOP[w]=1;});
+function addOrt(bag,name){
+  if(name && !ORT_STOP[name.toLowerCase()]) bag[name]=1;
+}
+var ORT_RE_PATH=/(?:\bin|Standort)\s+([A-ZÄÖÜ][a-zäöüß]{2,})/;
+var ORT_RE_TEXT=/Standort\s+([A-ZÄÖÜ][a-zäöüß]{2,})/g;
+function parseVeranstaltung(v,path){
+  if(txt(v,'druck_vvz')==='N') return null;
+  var termine=parseTermine(v);
+  var blocks=[];
+  TEXTBLOCKS.forEach(function(tag){
+    var holder=firstKid(v,tag); if(!holder) return;
+    var ft=firstKid(holder,'FormattedText'); if(!ft) return;
+    var frag=convertFT(ft);
+    if(ftHasContent(frag)) blocks.push({key:tag,frag:frag});
+  });
+  /* Standorte ermitteln: Raumangaben, Rubriktitel, "Standort X" im Text */
+  var orte={};
+  termine.forEach(function(r){
+    var m=/^([A-ZÄÖÜ][a-zäöüß]{2,})\b/.exec(r.room||'');
+    if(m) addOrt(orte,m[1]);
+  });
+  path.forEach(function(titleStr){
+    var m=ORT_RE_PATH.exec(titleStr||'');
+    if(m) addOrt(orte,m[1]);
+  });
+  var c={
+    kind:'course',
+    nr:txt(v,'VeranstNummer'),
+    name:txt(v,'VName')||t('card.untitled'),
+    typ:txt(v,'VDTyp')||txt(v,'VTyp'),
+    sws:txt(v,'VSWS'), ects:txt(v,'ECTS'), maxTn:txt(v,'MaxTeilnehmer'),
+    hyper:txt(v,'VHyper'),
+    persons:kids(v,'VZLehrPerson').map(personName).filter(Boolean),
+    termine:termine, blocks:blocks, orte:Object.keys(orte), path:path.slice()
+  };
+  c.id=c.nr||('x'+(c.name+ (termine[0]||{}).start).replace(/\W/g,'').slice(0,24));
+
+  /* Volltext und Anmelde-Adressen einmalig beim Parsen einsammeln */
+  var holder=document.createElement('div');
+  blocks.forEach(function(b){holder.appendChild(b.frag.cloneNode(true));});
+  c.text=holder.textContent||'';
+  /* "Standort Aachen" o. Ä. aus der Bemerkung nachziehen */
+  ORT_RE_TEXT.lastIndex=0;
+  var om;
+  while((om=ORT_RE_TEXT.exec(c.text))) addOrt(orte,om[1]);
+  c.orte=Object.keys(orte);
+  var seen={};
+  c.mails=$$('a[href^="mailto:"]',holder).map(function(x){
+    return x.getAttribute('href').slice(7);
+  }).filter(function(m){if(!m||seen[m])return false;seen[m]=1;return true;});
+
+  c.blobRaw=[c.nr,c.name,c.typ,c.persons.join(' '),
+          termine.map(function(r){
+            return [r.dayFull,r.start,r.end,r.rhythm,r.room].filter(Boolean).join(' ');}).join(' '),
+          c.text].join(' ').replace(/\s+/g,' ');
+  c.blob =normL(c.blobRaw);
+  c.blobE=normE(c.blobRaw);
+
+  /* Anmeldefrist aus dem Fließtext ziehen. Nur wenn das Schlüsselwort
+     unmittelbar vor dem Datum steht — sonst ist zu unklar, ob das Datum
+     den Beginn oder das Ende der Frist meint. "bis" schlägt "ab". */
+  var fen=/Anmeld\w*([\s\S]{0,160})/i.exec(c.text);
+  if(fen){
+    var DAT='(\\d{1,2}\\.\\d{1,2}\\.(?:\\d{4}|\\d{2})?)';
+    var bis=new RegExp('(?:bis(?:\\s+zum)?|sp\u00e4testens(?:\\s+am)?)\\s*'+DAT,'i').exec(fen[1]);
+    var ab =new RegExp('\\bab\\s*(?:dem\\s*)?'+DAT,'i').exec(fen[1]);
+    if(bis)      c.frist={datum:bis[1].replace(/\.$/,'.'),art:'bis'};
+    else if(ab)  c.frist={datum:ab[1].replace(/\.$/,'.'), art:'ab'};
+  }
+  return c;
+}
+
+var secSeq=0, secPrefix='';
+function parseVorlesung(vorl,level,path){
+  var ueb=firstKid(vorl,'Ueberschrift');
+  var title=(ueb?txt(ueb,'UeBez'):'')||txt(vorl,'UeBez')||t('sec.untitled');
+  var anm=ueb?firstKid(ueb,'Anmerkung'):null;
+  var content=[];
+  if(ueb) content=content.concat([].slice.call(ueb.children).filter(isContent));
+  content=content.concat([].slice.call(vorl.children).filter(function(c){return c!==ueb&&isContent(c);}));
+  return mkSection(title,anm,content,level,path);
+}
+function parseUeberschrift(ueb,level,path){
+  return mkSection(txt(ueb,'UeBez')||t('sec.untitled'), firstKid(ueb,'Anmerkung'),
+                   [].slice.call(ueb.children).filter(isContent), level, path);
+}
+function isContent(c){return c.nodeName==='Veranstaltung'||c.nodeName==='Vorlesung'||c.nodeName==='Ueberschrift';}
+
+function mkSection(title,anmHolder,content,level,path){
+  var sec={kind:'sec',id:secPrefix+'s'+(++secSeq),title:title,level:level,children:[],count:0,infoFrag:null};
+  if(anmHolder){var ft=firstKid(anmHolder,'FormattedText');
+    if(ft){var f=convertFT(ft); if(ftHasContent(f)) sec.infoFrag=f;}}
+  var sub=path.concat([title]);
+  content.forEach(function(n){
+    var child=dispatch(n,level+1,sub);
+    if(child){sec.children.push(child); sec.count+=(child.kind==='sec'?child.count:1);}
+  });
+  return sec;
+}
+function dispatch(node,level,path){
+  if(node.nodeName==='Veranstaltung') return parseVeranstaltung(node,path);
+  if(node.nodeName==='Vorlesung')     return parseVorlesung(node,level,path);
+  if(node.nodeName==='Ueberschrift')  return parseUeberschrift(node,level,path);
+  return null;
+}
+
+function parseSource(xmlText,srcId){
+  var doc=new DOMParser().parseFromString(xmlText,'application/xml');
+  var perr=doc.querySelector('parsererror');
+  if(perr) throw new Error(t('err.notXml'));
+  var root=doc.documentElement;
+  var vvz=root.querySelector('Vorlesungsverzeichnis');
+  var tree=vvz?vvz.querySelector('Tree'):null;
+  if(!tree) throw new Error(t('err.noTree'));
+  secSeq=0; secPrefix=srcId?srcId+'-':'';
+  var glob=root.querySelector('global');
+  var cat={
+    title:txt(vvz,'UeBez')||'Vorlesungsverzeichnis',
+    semester:glob?txt(glob,'Param0'):'',
+    nodes:[], courses:[]
+  };
+  [].slice.call(tree.children).filter(isContent).forEach(function(n){
+    var s=dispatch(n,1,[]); if(s) cat.nodes.push(s);
+  });
+  (function collect(list){list.forEach(function(n){
+    if(n.kind==='course') cat.courses.push(n); else collect(n.children);});})(cat.nodes);
+  if(!cat.courses.length) throw new Error(t('err.noCourses'));
+  return cat;
+}
+
+/* ═══════════════ Mehrere Verzeichnisse ═══════════════
+   Jede geladene Datei bleibt als eigene Quelle erhalten. Beim Verschmelzen
+   bekommt bei mehr als einer Quelle jede eine eigene oberste Rubrik, damit
+   man sie auseinanderhalten und über die Bereichswahl isolieren kann. */
+var SOURCES=[];
+
+function neueQuellenId(){
+  return 'q'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36);
+}
+function levelShift(node,d){
+  if(node.kind==='sec'){ node.level+=d; node.children.forEach(function(c){levelShift(c,d);}); }
+}
+
+function rebuildCatalog(){
+  if(!SOURCES.length){ CAT=null; return null; }
+  var mehrere=SOURCES.length>1;
+  var alleNodes=[], alleKurse=[];
+
+  /* Erst die Titel bestimmen. Tragen zwei Quellen denselben Titel, bekommen
+     sie einen Zusatz (Dateiname oder Datum), sonst sind sie in der Bereichs-
+     wahl nicht auseinanderzuhalten. */
+  SOURCES.forEach(function(src){
+    if(src.title) return;
+    var p=parseSource(src.xml,'probe');
+    src.title=p.title; src.semester=p.semester; src.n=p.courses.length;
+  });
+  var titelZahl={};
+  SOURCES.forEach(function(src){titelZahl[src.title]=(titelZahl[src.title]||0)+1;});
+  SOURCES.forEach(function(src){
+    if(titelZahl[src.title]<2){ src.label=src.title; return; }
+    var zusatz=src.name||'';
+    if(!zusatz && src.mtime){
+      var d=new Date(src.mtime);
+      zusatz=('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
+    }
+    src.label=src.title+(zusatz?' · '+zusatz:'');
+  });
+
+  SOURCES.forEach(function(src){
+    var cat=parseSource(src.xml, src.id);
+    src.title=cat.title; src.semester=cat.semester; src.n=cat.courses.length;
+    if(mehrere){
+      cat.nodes.forEach(function(nd){levelShift(nd,1);});
+      var wrap={kind:'sec', id:src.id+'-root', title:src.label||cat.title, level:1,
+                children:cat.nodes, count:cat.courses.length, infoFrag:null};
+      /* Quellenbezeichnung in den Pfad aufnehmen, damit Standorterkennung und
+         "steht auch unter" die Herkunft mitzeigen */
+      var lab=src.label||cat.title;
+      cat.courses.forEach(function(c){c.path=[lab].concat(c.path);});
+      alleNodes.push(wrap);
+    } else {
+      alleNodes=alleNodes.concat(cat.nodes);
+    }
+    /* Herkunft an jedem Kurs vermerken — für Stundenplan und Hinweise */
+    cat.courses.forEach(function(c){ c.srcId=src.id; c.srcLabel=src.label||src.title; });
+    alleKurse=alleKurse.concat(cat.courses);
+  });
+
+  /* Dieselbe Veranstaltung taucht oft mehrfach auf — jetzt quellenübergreifend */
+  var byId={};
+  alleKurse.forEach(function(c){(byId[c.id]=byId[c.id]||[]).push(c);});
+  Object.keys(byId).forEach(function(k){
+    var list=byId[k]; if(list.length<2) return;
+    list.forEach(function(c){
+      var andere=list.filter(function(o){return o!==c;});
+      c.alsoIn=andere.map(function(o){return o.path.join(' › ');});
+      /* Dublette in einer anderen Datei ist etwas anderes als eine weitere
+         Rubrik derselben Datei — das soll die Karte auch so sagen. */
+      c.alsoInFremd=andere.filter(function(o){return o.srcId && o.srcId!==c.srcId;}).length;
+    });
+  });
+
+  var semester=[];
+  SOURCES.forEach(function(sq){ if(sq.semester && semester.indexOf(sq.semester)<0) semester.push(sq.semester); });
+  CAT={ title: mehrere ? SOURCES.map(function(sq){return sq.label||sq.title;}).join(' + ')
+                       : SOURCES[0].title,
+        semester: semester.join(' / '),
+        nodes: alleNodes, courses: alleKurse };
+  return CAT;
+}
+
+/* Quelle hinzufügen bzw. ersetzen; wirft bei kaputter Datei */
+function quelleHinzu(xmlText, name, mtime, ersetzen){
+  var probe=parseSource(xmlText,'probe');      /* erst prüfen, dann übernehmen */
+  if(ersetzen) SOURCES=[];
+  else {
+    /* Versehentlich dasselbe Verzeichnis zweimal? Sonst erscheint jede
+       Veranstaltung doppelt und alle Karten melden "steht auch unter …". */
+    var gleich=SOURCES.filter(function(sq){
+      return sq.title===probe.title && sq.semester===probe.semester; });
+    if(gleich.length && confirm(t('src.dupAsk', probe.title, probe.semester||'—')))
+      SOURCES=SOURCES.filter(function(sq){return gleich.indexOf(sq)<0;});
+  }
+  SOURCES.forEach(function(sq){sq.label='';});
+  SOURCES.push({id:neueQuellenId(), xml:xmlText, name:name||'', mtime:mtime||0,
+                title:probe.title, semester:probe.semester, n:probe.courses.length});
+  rebuildCatalog();
+  buildApp(CAT);
+  quellenSichern();
+}
+function quelleWeg(id){
+  SOURCES=SOURCES.filter(function(sq){return sq.id!==id;});
+  SOURCES.forEach(function(sq){sq.label='';});
+  quellenSichern();
+  if(!SOURCES.length){ zurueckZumStart(); return; }
+  rebuildCatalog(); buildApp(CAT);
+}
+function quellenSichern(){
+  var noop=function(){};
+  try{
+    idbSet('sources', SOURCES.map(function(sq){
+      return {id:sq.id,xml:sq.xml,name:sq.name,mtime:sq.mtime,
+              title:sq.title,semester:sq.semester,n:sq.n};
+    })).catch(noop);
+  }catch(e){}
+}
+function zurueckZumStart(){
+  try{sessionStorage.removeItem('hfmt-autoload');}catch(e){}
+  CAT=null;
+  $('#screenApp').hidden=true; $('#screenStart').hidden=false; window.scrollTo(0,0);
+}
+
+/* ═══════════════ Termin-Logik ═══════════════ */
+function toMin(s){var m=/^(\d{1,2}):(\d{2})/.exec(s||'');return m?(+m[1])*60+(+m[2]):null;}
+function minStr(m){var h=Math.floor(m/60),x=m%60;return h+':'+(x<10?'0':'')+x;}
+function toDate(s){var m=/^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s||'');
+  return m?new Date(+m[3],+m[2]-1,+m[1]):null;}
+function isBlockish(r){return /Einzel|Block/i.test(r.rhythmus||r.rhythm||'');}
+
+/* Mehrfach identisch eingetragene Termine zusammenfassen */
+function mergedTermine(course){
+  if(course._mt) return course._mt;
+  var map=new Map();
+  course.termine.forEach(function(r){
+    var key=(r.day||'-')+'|'+(r.start||'')+'|'+(r.end||'');
+    if(!map.has(key)){
+      map.set(key,{day:r.day,dayFull:r.dayFull,start:r.start,end:r.end,
+                   rhythm:r.rhythm,rhythmus:r.rhythmus,rooms:[],dates:[],fromDates:[],
+                   notes:[],dupes:0,from:r.from,to:r.to});
+    }
+    var m=map.get(key); m.dupes++;
+    if(r.room && m.rooms.indexOf(r.room)<0) m.rooms.push(r.room);
+    if(r.note && m.notes.indexOf(r.note)<0) m.notes.push(r.note);
+    var d=r.from?(r.from+(r.to&&r.to!==r.from?'–'+r.to:'')):'';
+    if(d && m.dates.indexOf(d)<0) m.dates.push(d);
+    if(r.from && m.fromDates.indexOf(r.from)<0) m.fromDates.push(r.from);
+    var df=toDate(r.from), dt=toDate(r.to);
+    if(df && (!toDate(m.from) || df<toDate(m.from))) m.from=r.from;
+    if(dt && (!toDate(m.to)  || dt>toDate(m.to)))  m.to=r.to;
+  });
+  course._mt=Array.from(map.values());
+  return course._mt;
+}
+function terminLabel(m){
+  var head=[tagLang(m.dayFull)||t('card.noTime'),
+            (m.start||m.end)?(m.start+'–'+m.end):'', rhythmLang(m.rhythm)].filter(Boolean).join(' ');
+  var extra=[m.dates.join(', '), m.rooms.join(' / '), m.notes.join(' ')].filter(Boolean).join(', ');
+  return {head:head,extra:extra};
+}
+/* Überschneiden sich zwei Termine (Uhrzeit UND Zeitraum)? */
+function overlaps(a,b){
+  if(a.day!==b.day||!a.day) return false;
+  var as=toMin(a.start),ae=toMin(a.end),bs=toMin(b.start),be=toMin(b.end);
+  if(as==null||ae==null||bs==null||be==null) return false;
+  if(!(as<be && bs<ae)) return false;
+  var af=toDate(a.from),at=toDate(a.to),bf=toDate(b.from),bt=toDate(b.to);
+  if(af&&at&&bf&&bt && !(af<=bt && bf<=at)) return false;   /* Zeiträume disjunkt */
+  return true;
+}
+
+/* ═══════════════ Rendering ═══════════════ */
+var CAT=null, allK=[], allS=[], courseById={}, orteAll=[], ORTE_BEKANNT={};
+var BEREICH_LVL=1;
+function bestimmeBereichsEbene(){
+  for(var L=1;L<=4;L++){
+    var anz=0;
+    for(var i=0;i<allS.length;i++) if(allS[i]._sec.level===L) anz++;
+    if(anz>=2) return L;
+    if(anz===0) break;
+  }
+  return 1;
+}
+
+function statusOf(id){return state.status[id]||'';}
+function setStatus(id,st){
+  if(st) state.status[id]=st; else delete state.status[id];
+  saveState();
+}
+
+function renderCourse(c){
+  var a=document.createElement('article');
+  a.className='kurs'; a.dataset.id=c.id; a.id='k-'+c.id;
+  a._course=c;
+
+  var top=document.createElement('div'); top.className='kurs-top';
+  var h=document.createElement('h4'); h.className='kurs-titel';
+  h.innerHTML=(c.nr?'<span class="nr">'+esc(c.nr)+'</span> ':'')+esc(c.name);
+  top.appendChild(h);
+
+  var seg=document.createElement('div'); seg.className='seg';
+  [['fest',t('card.fest')],['vielleicht',t('card.evtl')],['raus',t('card.hide')]].forEach(function(p){
+    var b=document.createElement('button');
+    b.type='button'; b.dataset.st=p[0]; b.textContent=p[1];
+    b.title={fest:t('card.festTitle'),vielleicht:t('card.evtlTitle'),
+             raus:t('card.hideTitle')}[p[0]];
+    b.onclick=function(ev){ev.stopPropagation();
+      setStatus(c.id, statusOf(c.id)===p[0] ? '' : p[0]);
+      refreshById(c.id); updateCounts(); refreshClashHints(); runFilter();
+      if($('#plan').classList.contains('open')) drawPlan();};
+    seg.appendChild(b);
+  });
+  top.appendChild(seg);
+  a.appendChild(top);
+
+  var meta=[];
+  if(c.typ) meta.push(esc(c.typ));
+  if(c.sws) meta.push(t('card.sws')+' '+esc(c.sws));
+  if(c.ects) meta.push(t('card.ects')+' '+esc(c.ects));
+  if(c.maxTn) meta.push(t('card.maxTn')+' '+esc(c.maxTn));
+  if(c.persons.length) meta.push(t('card.lead')+' '+esc(c.persons.join(', ')));
+  if(meta.length){var p=document.createElement('p');p.className='meta';
+    p.innerHTML=meta.join(' &nbsp;·&nbsp; ');a.appendChild(p);}
+
+  var mt=mergedTermine(c);
+  if(mt.length){
+    var ul=document.createElement('ul'); ul.className='termine';
+    mt.forEach(function(m){
+      var L=terminLabel(m), li=document.createElement('li');
+      li.innerHTML=esc(L.head)+(L.extra?' <span class="termin-extra">'+esc(L.extra)+'</span>':'');
+      if(m.dupes>1) li.title=t('card.dupes',m.dupes);
+      ul.appendChild(li);
+    });
+    a.appendChild(ul);
+  }
+
+  /* Anmelde-Kontakt aus den Texten herausziehen */
+  var mailList=c.mails||[];
+  if(mailList.length||c.hyper){
+    var bp=document.createElement('p'); bp.style.margin='.2rem 0 .35rem';
+    var parts=[];
+    mailList.slice(0,2).forEach(function(m){
+      parts.push('<a class="badge anm" href="mailto:'+esc(m)+'">✉ '+esc(m)+'</a>');});
+    if(c.hyper) parts.push('<a class="badge" href="'+esc(c.hyper)+'" target="_blank" rel="noopener">'+esc(t('card.coursePage'))+'</a>');
+    bp.innerHTML=parts.join(' ');
+    a.appendChild(bp);
+  }
+  if(c.frist){
+    var fp=document.createElement('p'); fp.style.margin='.1rem 0 .3rem';
+    var wort=t(c.frist.art==='bis'?'card.regBy':'card.regFrom');
+    fp.innerHTML='<span class="badge frist" title="'+esc(t('card.regTitle'))+
+      '">📅 '+esc(wort)+' '+esc(c.frist.datum)+'</span>';
+    a.appendChild(fp);
+  }
+  /* Bei mehreren geladenen Verzeichnissen auf jeder Karte zeigen, woher sie stammt —
+     sonst ist bei einer Suche quer über alle Quellen die Herkunft unklar. */
+  if(SOURCES.length>1 && c.path.length){
+    var qp=document.createElement('p'); qp.style.margin='.1rem 0 .3rem';
+    qp.innerHTML='<span class="badge quelle" title="'+esc(t('src.title'))+'">📄 '+
+                 esc(c.path[0])+'</span>';
+    a.appendChild(qp);
+  }
+  if(c.alsoIn && c.alsoIn.length){
+    var ai=document.createElement('p'); ai.style.margin='.1rem 0 .3rem';
+    /* Getrennt ausweisen: andere Datei und andere Rubrik sind zweierlei,
+       und beides kann gleichzeitig zutreffen. */
+    var fremd=c.alsoInFremd||0, eigen=c.alsoIn.length-fremd, teile=[];
+    if(fremd) teile.push(tn(fremd,'card.alsoFileFrag'));
+    if(eigen) teile.push(tn(eigen,'card.alsoSecFrag'));
+    ai.innerHTML='<span class="badge" title="'+esc(c.alsoIn.join('\n'))+'">'+
+      esc(t('card.alsoPre')+teile.join(' · '))+'</span>';
+    a.appendChild(ai);
+  }
+
+  var warn=document.createElement('div'); warn.className='clashwarn'; warn.hidden=true;
+  a.appendChild(warn); a._warn=warn;
+
+  c.blocks.forEach(function(b){
+    var d=document.createElement('div'); d.className='block';
+    var s=document.createElement('span'); s.className='block-label'; s.textContent=t('blk.'+b.key);
+    d.appendChild(s); d.appendChild(b.frag.cloneNode(true));
+    a.appendChild(d);
+  });
+
+  /* Im Kompaktmodus: Beschreibung dieser einen Karte zeigen */
+  if(c.blocks.length){
+    a.classList.add('hasdesc');
+    var dt=document.createElement('button');
+    dt.type='button'; dt.className='desc-toggle';
+    dt.textContent=t('card.desc');
+    dt.onclick=function(ev){
+      ev.stopPropagation();
+      var auf=a.classList.toggle('showdesc');
+      dt.textContent=t(auf?'card.descHide':'card.desc');
+    };
+    a.appendChild(dt);
+  }
+
+  /* Notizfeld */
+  var nw=document.createElement('div'); nw.className='note-wrap';
+  var nt=document.createElement('button'); nt.className='note-toggle'; nt.type='button';
+  var ta=document.createElement('textarea'); ta.rows=2;
+  ta.placeholder=t('card.notePh');
+  ta.value=state.notes[c.id]||'';
+  ta.hidden=!ta.value;
+  nt.textContent=t(ta.value?'card.note':'card.noteAdd');
+  nt.onclick=function(){ta.hidden=!ta.hidden; if(!ta.hidden) ta.focus();};
+  ta.oninput=function(){
+    if(ta.value.trim()) state.notes[c.id]=ta.value; else delete state.notes[c.id];
+    nt.textContent=t(ta.value.trim()?'card.note':'card.noteAdd');
+    saveState();};
+  nw.appendChild(nt); nw.appendChild(ta);
+  a.appendChild(nw);
+
+  a._blob=c.blob; a._blobE=c.blobE;
+  refreshCourse(a);
+  return a;
+}
+
+/* Eine Veranstaltung kann in mehreren Rubriken stehen — alle Karten mitziehen */
+function refreshById(id){
+  allK.forEach(function(a){ if(a.dataset.id===id) refreshCourse(a); });
+}
+function refreshCourse(a){
+  var st=statusOf(a.dataset.id);
+  a.classList.toggle('st-fest',st==='fest');
+  a.classList.toggle('st-evtl',st==='vielleicht');
+  a.classList.toggle('st-raus',st==='raus');
+  $$('.seg button',a).forEach(function(b){b.classList.toggle('on',b.dataset.st===st);});
+}
+
+function renderSection(sec){
+  var el=document.createElement('section');
+  el.className='sec'; el.dataset.lvl=Math.min(sec.level,5); el.id=sec.id;
+  el._sec=sec;
+
+  var head=document.createElement('div'); head.className='sec-head';
+  var ttl=document.createElement('div'); ttl.className='ttl'; ttl.setAttribute('role','button');
+  ttl.tabIndex=0;
+  var hl=Math.min(Math.max(sec.level+1,2),6);
+  ttl.innerHTML='<span class="caret">▾</span><h'+hl+' class="sec-title">'+esc(sec.title)+'</h'+hl+'>';
+  var cnt=document.createElement('span'); cnt.className='sec-count'; cnt.textContent=sec.count;
+  ttl.appendChild(cnt);
+  function toggle(){el.classList.toggle('collapsed');}
+  ttl.onclick=toggle;
+  ttl.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}};
+  head.appendChild(ttl);
+
+  var hide=document.createElement('button'); hide.className='sec-hide'; hide.type='button';
+  hide.title=t('sec.hideTitle');
+  hide.textContent=t('sec.hide');
+  hide.onclick=function(ev){ev.stopPropagation();
+    if(state.hiddenSections[sec.id]) delete state.hiddenSections[sec.id];
+    else state.hiddenSections[sec.id]=1;
+    saveState(); applySectionHiding(); buildTOC();};
+  head.appendChild(hide);
+  el.appendChild(head);
+
+  var body=document.createElement('div'); body.className='sec-body';
+  if(sec.infoFrag) {
+    var info=document.createElement('div'); info.className='rubrik-info';
+    info.appendChild(sec.infoFrag.cloneNode(true)); body.appendChild(info);
+  }
+  sec.children.forEach(function(ch){
+    body.appendChild(ch.kind==='sec'?renderSection(ch):renderCourse(ch));
+  });
+  el.appendChild(body);
+  return el;
+}
+
+function applySectionHiding(){
+  allS.forEach(function(el){
+    var h=!!state.hiddenSections[el.id];
+    el.classList.toggle('userhidden',h);
+    var b=$('.sec-hide',el);
+    if(b) b.textContent=t(h?'sec.show':'sec.hide');
+  });
+  var nS=Object.keys(state.hiddenSections).length;
+  var nC=Object.keys(state.status).filter(function(k){return state.status[k]==='raus';}).length;
+  var parts=[];
+  if(nS) parts.push(tn(nS,'f.hiddenSec'));
+  if(nC) parts.push(tn(nC,'f.hiddenCourse'));
+  $('#hiddenInfo').textContent=parts.length?t('f.hidden',parts.join(', ')):'';
+}
+
+/* ═══════════════ TOC ═══════════════ */
+function buildTOC(){
+  var toc=$('#toc');
+  toc.innerHTML='';
+  /* Auf schmalen Schirmen stehen die Werkzeugknöpfe hier statt in der Kopfleiste */
+  var tools=document.createElement('div'); tools.className='toctools';
+  [['collapseAll','bar.collapse'],['expandAll','bar.expand'],['compactBtn','bar.compact'],
+   ['printBtn','bar.print'],['newFileBtn','bar.newfile']].forEach(function(p){
+    var orig=$('#'+p[0]); if(!orig) return;
+    var b=document.createElement('button'); b.type='button'; b.textContent=t(p[1]);
+    b.classList.toggle('on',orig.classList.contains('on'));
+    b.onclick=function(){ tocZu(); orig.click(); b.classList.toggle('on',orig.classList.contains('on')); };
+    tools.appendChild(b);
+  });
+  toc.appendChild(tools);
+  var hh=document.createElement('h2'); hh.textContent=t('toc.title'); toc.appendChild(hh);
+  allS.forEach(function(el){
+    var sec=el._sec;
+    if(state.ui.bereich && el._top!==state.ui.bereich) return;
+    var a=document.createElement('a');
+    /* Einrückung bei Ebene 5 deckeln: tiefere Bäume (etwa durch die
+       Quellen-Hülle beim Mehrfachladen) sollen nicht aus dem TOC fallen. */
+    a.href='#'+sec.id; a.className='lvl'+Math.min(sec.level,5);
+    if(state.hiddenSections[sec.id]) a.className+=' sec-hidden';
+    a.innerHTML=esc(sec.title)+' <span class="c">'+sec.count+'</span>';
+    a.onclick=function(e){e.preventDefault();
+      var p=el; while(p){if(p.classList&&p.classList.contains('sec'))p.classList.remove('collapsed');p=p.parentNode;}
+      tocZu();
+      el.scrollIntoView({behavior:'smooth',block:'start'});};
+    toc.appendChild(a);
+  });
+}
+
+/* ═══════════════ Quellenliste ═══════════════ */
+function renderQuellen(){
+  var btn=$('#srcBtn'), panel=$('#srcPanel');
+  btn.hidden=false;
+  btn.textContent=t('src.btn',SOURCES.length);
+  btn.classList.toggle('on',!panel.hidden);
+  if(panel.hidden) return;
+  var h='<h3>'+esc(t('src.title'))+'</h3><ul>';
+  SOURCES.forEach(function(sq){
+    var d=sq.mtime?new Date(sq.mtime):null;
+    var ds=d?('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear():'';
+    var det=[sq.semester, t('src.courses',sq.n||0), ds].filter(Boolean).join(' · ');
+    h+='<li><span class="snm"><b>'+esc(sq.label||sq.title||sq.name)+'</b>'+
+       (sq.name?' <span class="sdet">'+esc(sq.name)+'</span>':'')+
+       '<br><span class="sdet">'+esc(det)+'</span></span>'+
+       (SOURCES.length>1?'<button class="sonly" data-q="'+esc(sq.id)+'">'+esc(t('src.only'))+'</button>':'')+
+       '<button class="srm" data-q="'+esc(sq.id)+'">'+esc(t('plan.remove'))+'</button></li>';
+  });
+  h+='</ul><div class="srow"><button id="srcAdd">'+esc(t('src.add'))+'</button>'+
+     '<button id="srcReplace" class="ghost">'+esc(t('src.replace'))+'</button></div>';
+  panel.innerHTML=h;
+  $$('.srm',panel).forEach(function(b){b.onclick=function(){quelleWeg(b.dataset.q);};});
+  $$('.sonly',panel).forEach(function(b){b.onclick=function(){
+    SOURCES=SOURCES.filter(function(sq){return sq.id===b.dataset.q;});
+    quellenSichern(); rebuildCatalog(); buildApp(CAT);};});
+  $('#srcAdd',panel).onclick=function(){ $('#addInput').click(); };
+  $('#srcReplace',panel).onclick=function(){ zurueckZumStart(); };
+}
+
+/* ═══════════════ Bereichswahl (oberste Baumebene) ═══════════════
+   Wer im Portal weiter oben im Baum exportiert, bekommt mehrere Studiengänge
+   in einer Datei. Damit lässt sich einer davon isolieren. */
+function buildBereiche(){
+  var tops=allS.filter(function(el){return el._sec.level===BEREICH_LVL;});
+  var sel=$('#sgSel'), lbl=$('#sgLbl');
+  if(tops.length<2){ sel.hidden=true; lbl.hidden=true; state.ui.bereich=''; return; }
+  sel.innerHTML='';
+  var o0=document.createElement('option');
+  o0.value=''; o0.textContent=t('f.allAreas',tops.length);
+  sel.appendChild(o0);
+  tops.forEach(function(el){
+    var o=document.createElement('option');
+    o.value=el.id; o.textContent=el._sec.title+' ('+el._sec.count+')';
+    sel.appendChild(o);
+  });
+  if(state.ui.bereich && !tops.some(function(el){return el.id===state.ui.bereich;}))
+    state.ui.bereich='';
+  sel.value=state.ui.bereich||'';
+  sel.hidden=false; lbl.hidden=false;
+  sel.onchange=function(){
+    state.ui.bereich=sel.value; saveState(); buildTOC(); runFilter();
+    window.scrollTo(0,0);
+  };
+}
+
+/* ═══════════════ Filter / Suche ═══════════════ */
+function courseVisibleByOrt(c){
+  if(!orteAll.length) return true;
+  var ui=state.ui.orte||{};
+  if(!c.orte.length) return ui['(ohne)']!==false;
+  return c.orte.some(function(o){return ui[o]!==false;});
+}
+/* Hervorhebung ausschliesslich in Textknoten — niemals per Regex im HTML,
+   sonst zerlegt ein Suchbegriff wie "div" oder "nr" die Tags. */
+function unhighlight(el){
+  var marks=el.getElementsByTagName('mark');
+  while(marks.length){
+    var m=marks[0], p=m.parentNode;
+    while(m.firstChild) p.insertBefore(m.firstChild,m);
+    p.removeChild(m);
+  }
+  el.normalize();
+}
+function highlight(el,term){
+  if(!term) return;
+  var walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null),nodes=[],n;
+  while((n=walker.nextNode())) nodes.push(n);
+  nodes.forEach(function(node){
+    var t=node.nodeValue, low=normL(t), i=low.indexOf(term);
+    if(i<0) return;
+    var frag=document.createDocumentFragment(), pos=0, mk;
+    while(i>=0){
+      if(i>pos) frag.appendChild(document.createTextNode(t.slice(pos,i)));
+      mk=document.createElement('mark');
+      mk.appendChild(document.createTextNode(t.substr(i,term.length)));
+      frag.appendChild(mk);
+      pos=i+term.length;
+      i=low.indexOf(term,pos);
+    }
+    if(pos<t.length) frag.appendChild(document.createTextNode(t.slice(pos)));
+    node.parentNode.replaceChild(frag,node);
+  });
+}
+
+function runFilter(){
+  var roh=($('#q').value||'').trim();
+  var term=normL(roh), termE=normE(roh);
+  var onlyPicked=!!state.ui.onlyPicked;
+  var n=0;
+
+  allK.forEach(function(a){
+    var ti=$('.kurs-titel',a);
+    unhighlight(ti);
+    var c=a._course, st=statusOf(c.id);
+    var ok=true;
+    if(state.ui.bereich && a.dataset.top!==state.ui.bereich) ok=false;
+    if(ok && st==='raus' && !state.ui.showHidden) ok=false;
+    if(ok && term && a._blob.indexOf(term)<0 && a._blobE.indexOf(termE)<0) ok=false;
+    if(ok && onlyPicked && st!=='fest' && st!=='vielleicht') ok=false;
+    if(ok && !courseVisibleByOrt(c)) ok=false;
+    a.classList.toggle('hidden',!ok);
+    if(ok){ n++; if(term) highlight(ti,term); }
+  });
+
+  allS.forEach(function(el){
+    var any=el.querySelector('.kurs:not(.hidden)');
+    el.classList.toggle('hidden',!any);
+    if(any && term) el.classList.remove('collapsed');
+  });
+  $('#hits').textContent=(term||onlyPicked||orteAll.length)?t('bar.hits',n,allK.length):'';
+}
+
+/* ═══════════════ Kollisionshinweise im Katalog ═══════════════ */
+function refreshClashHints(){
+  var seenF={}, fest=[];
+  allK.forEach(function(a){
+    var c=a._course;
+    if(statusOf(c.id)!=='fest' || seenF[c.id]) return;
+    seenF[c.id]=1; fest.push(c);
+  });
+  var festSlots=[];
+  fest.forEach(function(c){mergedTermine(c).forEach(function(m){
+    if(m.day&&toMin(m.start)!=null) festSlots.push({c:c,m:m});});});
+  /* eigene Termine blockieren genauso */
+  eigenSlots().forEach(function(sl){festSlots.push({c:sl.c,m:sl.m});});
+  allK.forEach(function(a){
+    var c=a._course, w=a._warn, st=statusOf(c.id);
+    var hitNames={};
+    if(st!=='raus'){
+      mergedTermine(c).forEach(function(m){
+        if(!m.day||toMin(m.start)==null) return;
+        festSlots.forEach(function(f){
+          if(f.c.id===c.id) return;
+          if(overlaps(m,f.m)) hitNames[(f.c.nr?f.c.nr+' ':'')+f.c.name]=1;
+        });
+      });
+    }
+    var names=Object.keys(hitNames);
+    if(names.length){
+      w.hidden=false;
+      w.textContent=t('card.clash',names.slice(0,3).join(' · '))+
+                    (names.length>3?t('card.clashMore',names.length-3):'');
+    } else w.hidden=true;
+  });
+}
+
+/* ═══════════════ Zähler ═══════════════ */
+function updateCounts(){
+  var f=0,v=0;
+  Object.keys(state.status).forEach(function(k){
+    if(state.status[k]==='fest')f++; else if(state.status[k]==='vielleicht')v++;});
+  $('#planCnt').textContent=f+(v?'+'+v:'');
+  applySectionHiding();
+}
+
+/* ═══════════════ Stundenplan ═══════════════ */
+var H0=8,H1=22,PXH=44;
+/* Dieselbe Veranstaltung steht oft in mehreren Rubriken. Für den Stundenplan
+   zählt sie genau einmal — sonst stünde sie mehrfach nebeneinander im Raster
+   und SWS/ECTS würden doppelt summiert. */
+var PLAN_DIVERGENZ=[];
+function planCourses(){
+  /* Dieselbe Veranstaltungsnummer kann mehrfach vorkommen — in mehreren
+     Rubriken und, bei mehreren geladenen Dateien, in mehreren Fassungen.
+     Für das Raster zählt sie einmal; genommen wird die Fassung mit den
+     meisten auswertbaren Terminen, bei Gleichstand die aus der neueren Datei.
+     Sonst verschwindet ein Kurs, dessen eine Fassung keine Zeit enthält. */
+  var gruppen={};
+  allK.forEach(function(a){
+    var c=a._course, st=statusOf(c.id);
+    if(st!=='fest' && st!=='vielleicht') return;
+    if(!gruppen[c.id]) gruppen[c.id]=[];
+    if(gruppen[c.id].indexOf(c)<0) gruppen[c.id].push(c);
+  });
+  function punkte(c){
+    return mergedTermine(c).filter(function(m){
+      return m.day && toMin(m.start)!=null; }).length;
+  }
+  function alterDerQuelle(c){
+    for(var i=0;i<SOURCES.length;i++) if(SOURCES[i].id===c.srcId) return SOURCES[i].mtime||0;
+    return 0;
+  }
+  function signatur(c){
+    return mergedTermine(c).map(function(m){
+      return (m.day||'-')+(m.start||'')+(m.end||'')+(m.rooms[0]||''); }).sort().join('|');
+  }
+  PLAN_DIVERGENZ=[];
+  var beste={};
+  Object.keys(gruppen).forEach(function(id){
+    var list=gruppen[id];
+    beste[id]=list.length===1 ? list[0] : list.slice().sort(function(x,y){
+      return punkte(y)-punkte(x) || alterDerQuelle(y)-alterDerQuelle(x);
+    })[0];
+    if(list.length>1){
+      var sig={}, anzahl=0;
+      list.forEach(function(c){ var k=signatur(c); if(!sig[k]){sig[k]=1;anzahl++;} });
+      if(anzahl>1) PLAN_DIVERGENZ.push({nr:beste[id].nr, name:beste[id].name,
+                                        quelle:beste[id].srcLabel||''});
+    }
+  });
+  /* Reihenfolge wie im Katalog beibehalten */
+  var gesehen={}, out=[];
+  allK.forEach(function(a){
+    var id=a._course.id;
+    if(!beste[id] || gesehen[id]) return;
+    gesehen[id]=1; out.push(beste[id]);
+  });
+  return out;
+}
+function num(s){var m=/(\d+(?:[.,]\d+)?)/.exec(s||'');return m?parseFloat(m[1].replace(',','.')):null;}
+
+/* ═══════════════ Eigene Termine ═══════════════
+   Frei eintragbare Wochentermine (Hauptfach, Üben, Sport …). Sie liegen in
+   state.eigene und werden fürs Raster in dieselbe Slot-Form gebracht wie
+   Veranstaltungen, damit Überschneidungsprüfung und Layout unverändert greifen. */
+var EIGEN_FARBEN=[
+  {n:'Blau',   b:'#2b5c9b', s:'#e7eef8'},
+  {n:'Violett',b:'#6b3fa0', s:'#f0e9f9'},
+  {n:'Türkis', b:'#12706a', s:'#e1f0ee'},
+  {n:'Orange', b:'#a6560f', s:'#fbeade'},
+  {n:'Rosa',   b:'#9b2b6b', s:'#f9e7f1'},
+  {n:'Grau',   b:'#4a4a52', s:'#eeeef1'}
+];
+function eigenFarbe(ev){return EIGEN_FARBEN[ev&&ev.farbe||0]||EIGEN_FARBEN[0];}
+
+/* Ein eigener Termin, verpackt wie ein Kurs-Slot */
+function eigenSlots(){
+  var out=[];
+  (state.eigene||[]).forEach(function(ev){
+    var s0=toMin(ev.von), e0=toMin(ev.bis);
+    if(!ev.tag || s0==null || e0==null || e0<=s0) return;
+    var m={day:ev.tag,dayFull:ev.tag,start:ev.von,end:ev.bis,rhythm:'wöchentl.',rhythmus:'wöchentlich',
+           rooms:ev.raum?[ev.raum]:[],dates:[],fromDates:[],notes:ev.notiz?[ev.notiz]:[],
+           dupes:1,from:'',to:''};
+    out.push({c:{id:'eig:'+ev.id,nr:'',name:ev.titel,eigen:true},m:m,st:'eigen',
+              day:ev.tag,s:s0,e:e0,blockish:false,eigen:true,ev:ev});
+  });
+  return out;
+}
+
+/* ── Formular ── */
+var efAktuell=null;   /* id des gerade bearbeiteten Termins, null = neu */
+var efFarbe=0;
+function eigenFormBauen(){
+  var sel=$('#efTag'), alt=sel.value;
+  sel.innerHTML='';
+  DAYS.forEach(function(d){
+    var o=document.createElement('option'); o.value=d; o.textContent=t('dayL.'+d); sel.appendChild(o);});
+  if(alt) sel.value=alt;
+  var box=$('#efColors');
+  if(!box.children.length)
+    EIGEN_FARBEN.forEach(function(f,i){
+      var b=document.createElement('button'); b.type='button'; b.title=f.n;
+      b.style.background=f.b;
+      b.onclick=function(){efFarbe=i; efFarbenMalen();};
+      box.appendChild(b);
+    });
+}
+function efFarbenMalen(){
+  $$('#efColors button').forEach(function(b,i){b.classList.toggle('on',i===efFarbe);});
+}
+function eigenFormOeffnen(id){
+  eigenFormBauen();
+  var ev=id?(state.eigene||[]).filter(function(x){return x.id===id;})[0]:null;
+  efAktuell=ev?ev.id:null;
+  efFarbe=ev?(ev.farbe||0):0;
+  $('#efTitel').value=ev?ev.titel:'';
+  $('#efTag').value=ev?ev.tag:'Mo';
+  $('#efVon').value=ev?ev.von:'';
+  $('#efBis').value=ev?ev.bis:'';
+  $('#efRaum').value=ev&&ev.raum?ev.raum:'';
+  $('#efNotiz').value=ev&&ev.notiz?ev.notiz:'';
+  $('#efErr').textContent='';
+  $('#efDel').hidden=!ev;
+  $('#efSave').textContent=t(ev?'ef.update':'ef.save');
+  efFarbenMalen();
+  $('#eigenForm').hidden=false;
+  $('#efTitel').focus();
+}
+function eigenFormSchliessen(){ $('#eigenForm').hidden=true; efAktuell=null; }
+function eigenSpeichern(){
+  var titel=$('#efTitel').value.trim(),
+      tag=$('#efTag').value, von=$('#efVon').value, bis=$('#efBis').value,
+      err=$('#efErr');
+  if(!titel){ err.textContent=t('ef.errTitle'); $('#efTitel').focus(); return; }
+  if(!von||!bis){ err.textContent=t('ef.errTime'); return; }
+  if(toMin(bis)<=toMin(von)){ err.textContent=t('ef.errOrder'); return; }
+  var daten={titel:titel,tag:tag,von:von,bis:bis,
+             raum:$('#efRaum').value.trim(), notiz:$('#efNotiz').value.trim(), farbe:efFarbe};
+  state.eigene=state.eigene||[];
+  if(efAktuell){
+    state.eigene.forEach(function(x){ if(x.id===efAktuell){ for(var k in daten) x[k]=daten[k]; } });
+  } else {
+    daten.id='e'+Date.now().toString(36)+Math.floor(Math.random()*1000).toString(36);
+    state.eigene.push(daten);
+  }
+  saveState(); eigenFormSchliessen(); refreshClashHints(); drawPlan();
+}
+function eigenLoeschen(){
+  if(!efAktuell) return;
+  state.eigene=(state.eigene||[]).filter(function(x){return x.id!==efAktuell;});
+  saveState(); eigenFormSchliessen(); refreshClashHints(); drawPlan();
+}
+
+/* Standort eines Termins, soweit aus der Raumangabe erkennbar */
+function ortVon(sl){
+  var r=(sl.m.rooms&&sl.m.rooms[0])||'';
+  var m=/^([A-ZÄÖÜ][a-zäöüß]{2,})/.exec(r);
+  if(m && ORTE_BEKANNT[m[1]]) return m[1];
+  if(!sl.eigen && sl.c.orte && sl.c.orte.length===1) return sl.c.orte[0];
+  return null;
+}
+/* Aufeinanderfolgende Termine an verschiedenen Standorten mit wenig
+   Puffer dazwischen einsammeln. Reiner Richtwert, keine Fahrplanauskunft. */
+function standortWechsel(slots){
+  var raus=[];
+  DAYS.forEach(function(d){
+    var ds=slots.filter(function(x){return x.day===d;})
+                .sort(function(a,b){return a.s-b.s;});
+    for(var i=0;i<ds.length-1;i++){
+      var a=ds[i], b=ds[i+1];
+      var oa=ortVon(a), ob=ortVon(b);
+      if(!oa||!ob||oa===ob) continue;
+      var puffer=b.s-a.e;
+      if(puffer>=WECHSEL_MIN) continue;
+      raus.push({tag:d,von:a,nach:b,ortA:oa,ortB:ob,puffer:puffer});
+    }
+  });
+  return raus;
+}
+
+function drawPlan(){
+  var body=$('#planBody'), data=planCourses();
+  if(!data.length && !(state.eigene||[]).length){
+    body.innerHTML='<p class="empty-note">'+t('plan.empty')+'</p>';
+    return;
+  }
+  var showEvtl=state.ui.showEvtl!==false, showBlock=state.ui.showBlock!==false;
+
+  var slots=[], unsched=[];
+  data.forEach(function(c){
+    var st=statusOf(c.id), any=false;
+    mergedTermine(c).forEach(function(m){
+      var s=toMin(m.start),e=toMin(m.end);
+      if(m.day && s!=null && e!=null && e>s){
+        any=true;
+        var blockish=isBlockish(m);
+        if(st==='vielleicht' && !showEvtl) return;
+        if(blockish && !showBlock) return;
+        slots.push({c:c,m:m,st:st,day:m.day,s:s,e:e,blockish:blockish});
+      }
+    });
+    if(!any) unsched.push(c);
+  });
+  slots=slots.concat(eigenSlots());
+
+  /* Konflikte */
+  var hard=new Set(), soft=new Set(), hardPairs=0;
+  for(var i=0;i<slots.length;i++) for(var j=i+1;j<slots.length;j++){
+    var A=slots[i],B=slots[j];
+    if(A.c.id===B.c.id) continue;
+    if(!overlaps(A.m,B.m)) continue;
+    var aFix=(A.st==='fest'||A.st==='eigen')&&!A.blockish;
+    var bFix=(B.st==='fest'||B.st==='eigen')&&!B.blockish;
+    if(aFix&&bFix){
+      hard.add(i);hard.add(j);hardPairs++;
+    } else { soft.add(i); soft.add(j); }
+  }
+
+  /* Spaltenlayout je Tag (nur echte Überlappungen teilen sich die Breite) */
+  var usedSo=slots.some(function(s){return s.day==='So';});
+  var alleTage=DAYS.slice(0,usedSo?7:6);
+  var tagModus=!!state.ui.planTag;
+  if(tagModus && alleTage.indexOf(state.ui.planTag)<0) state.ui.planTag=alleTage[0];
+  var days=tagModus?[state.ui.planTag]:alleTage;
+  alleTage.forEach(function(d){
+    var ds=slots.filter(function(s){return s.day===d;}).sort(function(a,b){return a.s-b.s||a.e-b.e;});
+    var i=0;
+    while(i<ds.length){
+      var j=i,maxEnd=ds[i].e;
+      while(j+1<ds.length && ds[j+1].s<maxEnd){j++;maxEnd=Math.max(maxEnd,ds[j].e);}
+      var cluster=ds.slice(i,j+1), cols=[];
+      cluster.forEach(function(sl){
+        var col=0; while(col<cols.length && cols[col]>sl.s) col++;
+        cols[col]=sl.e; sl.col=col;
+      });
+      var nc=Math.max(cols.length,1);
+      cluster.forEach(function(sl){sl.ncol=nc;});
+      i=j+1;
+    }
+  });
+
+  /* Summen */
+  var sums={fest:{n:0,sws:0,ects:0},evtl:{n:0,sws:0,ects:0}}, noEcts=0;
+  data.forEach(function(c){
+    var k=statusOf(c.id)==='fest'?'fest':'evtl';
+    sums[k].n++;
+    var s=num(c.sws), e=num(c.ects);
+    if(s) sums[k].sws+=s;
+    if(e) sums[k].ects+=e; else noEcts++;
+  });
+  function fmt(x){return Math.round(x*10)/10;}
+
+  var h='';
+  h+='<div class="sums">'+
+     '<div class="sum fest"><b>'+sums.fest.n+'</b>'+t('plan.sumFest')+'</div>'+
+     '<div class="sum evtl"><b>'+sums.evtl.n+'</b>'+t('plan.sumEvtl')+'</div>'+
+     '<div class="sum"><b>'+fmt(sums.fest.sws)+(sums.evtl.sws?' (+'+fmt(sums.evtl.sws)+')':'')+'</b>'+t('plan.sumSws')+'</div>'+
+     '<div class="sum"><b>'+fmt(sums.fest.ects)+(sums.evtl.ects?' (+'+fmt(sums.evtl.ects)+')':'')+'</b>'+t('plan.sumEcts')+
+       (noEcts?t('plan.sumEctsNo',noEcts):'')+'</div>'+
+     '</div>';
+  if(hardPairs)
+    h+='<p class="conflict-note">'+tn(hardPairs,'plan.conflict')+'</p>';
+  if(PLAN_DIVERGENZ.length){
+    h+='<div class="ortwarn divwarn"><b>'+t('plan.divWarn')+'</b><ul>';
+    PLAN_DIVERGENZ.slice(0,8).forEach(function(d){
+      h+='<li>'+esc(t('plan.divItem', d.nr, d.name, d.quelle))+'</li>';
+    });
+    if(PLAN_DIVERGENZ.length>8) h+='<li>…</li>';
+    h+='</ul><p class="mini" style="margin:.2rem 0 0">'+t('plan.divNote')+'</p></div>';
+  }
+  var wechsel=standortWechsel(slots);
+  if(wechsel.length){
+    h+='<div class="ortwarn"><b>'+t('plan.locWarn')+'</b><ul>';
+    wechsel.forEach(function(w){
+      h+='<li>'+esc(t('plan.locLine', t('day.'+w.tag), w.ortA, minStr(w.von.e),
+            w.ortB, minStr(w.nach.s),
+            w.puffer<0?t('plan.locOverlap'):t('plan.locMin',w.puffer)))+
+         '<br><span class="termin-extra">'+
+         esc((w.von.c.nr?w.von.c.nr+' ':'')+w.von.c.name)+' → '+
+         esc((w.nach.c.nr?w.nach.c.nr+' ':'')+w.nach.c.name)+'</span></li>';
+    });
+    h+='</ul><p class="mini" style="margin:.2rem 0 0">'+t('plan.locNote',WECHSEL_MIN)+'</p></div>';
+  }
+
+  if(tagModus){
+    var ix=alleTage.indexOf(state.ui.planTag);
+    h+='<div class="tagnav">'+
+       '<button class="tagprev"'+(ix<=0?' disabled':'')+'>◀</button>'+
+       '<b>'+t('dayL.'+state.ui.planTag)+'</b>'+
+       '<button class="tagnext"'+(ix>=alleTage.length-1?' disabled':'')+'>▶</button>'+
+       '<span class="mini">'+t('plan.dayCount',
+          slots.filter(function(x){return x.day===state.ui.planTag;}).length)+'</span></div>';
+  } else {
+    h+='<p class="scrollhint">'+t('plan.scrollhint')+'</p>';
+  }
+  h+='<div class="grid" style="--days:'+days.length+'">';
+  h+='<div class="gh"></div>';
+  days.forEach(function(d){h+='<div class="gh">'+t('day.'+d)+'</div>';});
+  var colH=(H1-H0)*PXH;
+  h+='<div style="display:grid;grid-template-rows:repeat('+(H1-H0)+','+PXH+'px)">';
+  for(var hh=H0;hh<H1;hh++) h+='<div class="gtime">'+hh+':00</div>';
+  h+='</div>';
+  days.forEach(function(d){
+    h+='<div class="gcol" style="height:'+colH+'px">';
+    for(var k=H0;k<H1;k++)
+      h+='<div style="position:absolute;left:0;right:0;top:'+((k-H0)*PXH)+'px;height:'+PXH+
+         'px;border-top:1px solid #eee"></div>';
+    slots.forEach(function(sl,idx){
+      if(sl.day!==d) return;
+      var top=(sl.s/60-H0)*PXH, hgt=Math.max((sl.e-sl.s)/60*PXH,17);
+      var w=100/(sl.ncol||1), left=(sl.col||0)*w;
+      var cls='evt'+(sl.st==='vielleicht'?' evtl':'')+(sl.eigen?' eigen':'')+
+              (hard.has(idx)?' clash':'')+
+              (!hard.has(idx)&&soft.has(idx)?' softclash':'')+(sl.blockish?' blockterm':'');
+      var farbstil='';
+      if(sl.eigen && !hard.has(idx)){
+        var fb=eigenFarbe(sl.ev);
+        farbstil='--ec:'+fb.b+';--ecs:'+fb.s+';';
+      }
+      var tip=[(sl.c.nr?sl.c.nr+' ':'')+sl.c.name, sl.m.rooms.join(' / '),
+               sl.eigen?t('plan.ownTermin'):rhythmLang(sl.m.rhythm),
+               sl.m.notes.join(' '),
+               sl.m.dates.join(', '), sl.m.dupes>1?t('plan.dupesTip',sl.m.dupes):'']
+              .filter(Boolean).join(' — ');
+      h+='<div class="'+cls+'" title="'+esc(tip)+'"'+
+         (sl.eigen?' data-eig="'+esc(sl.ev.id)+'"':'')+
+         ' style="'+farbstil+'top:'+top+'px;height:'+hgt+
+         'px;left:calc('+left+'% + 2px);width:calc('+w+'% - 4px)">'+
+         '<b>'+(sl.c.nr?esc(sl.c.nr)+' ':'')+esc(sl.c.name)+'</b>'+
+         '<small>'+minStr(sl.s)+'–'+minStr(sl.e)+
+         (sl.m.rooms.length?' · '+esc(sl.m.rooms[0]):'')+
+         (sl.blockish?' · '+esc(rhythmLang(sl.m.rhythm)||'Block'):'')+'</small></div>';
+    });
+    h+='</div>';
+  });
+  h+='</div>';
+
+  h+='<div class="plan-list">';
+  ['fest','vielleicht'].forEach(function(st){
+    var list=data.filter(function(c){return statusOf(c.id)===st;});
+    if(!list.length) return;
+    h+='<h3>'+t(st==='fest'?'plan.listFest':'plan.listEvtl',list.length)+'</h3><ul>';
+    list.forEach(function(c){
+      var tt=mergedTermine(c).filter(function(m){return m.day;})
+            .map(function(m){return t('day.'+m.day)+' '+m.start+'–'+m.end;}).join(', ');
+      h+='<li><span class="dot '+(st==='fest'?'fest':'evtl')+'"></span>'+
+         '<span class="nm"><b>'+esc(c.nr)+'</b> '+esc(c.name)+
+         (tt?' <span class="termin-extra">· '+esc(tt)+'</span>':' <span class="termin-extra">· '+t('plan.noFixed')+'</span>')+
+         '</span>'+
+         '<button class="sw" data-id="'+esc(c.id)+'" data-to="'+(st==='fest'?'vielleicht':'fest')+'">'+
+         t(st==='fest'?'plan.toEvtl':'plan.toFest')+'</button>'+
+         '<button class="rm" data-id="'+esc(c.id)+'">'+t('plan.remove')+'</button></li>';
+    });
+    h+='</ul>';
+  });
+  if(unsched.length){
+    h+='<h3>'+t('plan.unsched',unsched.length)+'</h3>'+
+       '<p class="mini" style="margin:.2rem 0 .4rem">'+t('plan.unschedNote')+'</p><ul>';
+    unsched.forEach(function(c){
+      h+='<li><span class="dot '+(statusOf(c.id)==='fest'?'fest':'evtl')+'"></span>'+
+         '<span class="nm"><b>'+esc(c.nr)+'</b> '+esc(c.name)+'</span>'+
+         '<button class="rm" data-id="'+esc(c.id)+'">'+t('plan.remove')+'</button></li>';
+    });
+    h+='</ul>';
+  }
+  if((state.eigene||[]).length){
+    h+='<h3>'+t('plan.own',state.eigene.length)+'</h3><ul>';
+    state.eigene.forEach(function(ev){
+      var fb=eigenFarbe(ev);
+      var det=[t('day.'+ev.tag)+' '+ev.von+'–'+ev.bis, ev.raum, ev.notiz].filter(Boolean).join(' · ');
+      h+='<li><span class="dot" style="background:'+fb.b+'"></span>'+
+         '<span class="nm"><b>'+esc(ev.titel)+'</b> '+
+         '<span class="termin-extra">· '+esc(det)+'</span></span>'+
+         '<button class="eig-ed" data-eig="'+esc(ev.id)+'">'+t('plan.edit')+'</button>'+
+         '<button class="eig-rm" data-eig="'+esc(ev.id)+'">'+t('plan.remove')+'</button></li>';
+    });
+    h+='</ul>';
+  }
+  h+='<p class="mini">'+t('plan.ectsNote')+'</p>';
+  h+='</div>';
+
+  body.innerHTML=h;
+  $$('.rm',body).forEach(function(b){b.onclick=function(){
+    setStatus(b.dataset.id,''); syncCourse(b.dataset.id); drawPlan();};});
+  $$('.sw',body).forEach(function(b){b.onclick=function(){
+    setStatus(b.dataset.id,b.dataset.to); syncCourse(b.dataset.id); drawPlan();};});
+  $$('.eig-ed',body).forEach(function(b){b.onclick=function(){
+    eigenFormOeffnen(b.dataset.eig);};});
+  $$('.eig-rm',body).forEach(function(b){b.onclick=function(){
+    state.eigene=(state.eigene||[]).filter(function(x){return x.id!==b.dataset.eig;});
+    saveState(); refreshClashHints(); drawPlan();};});
+  $$('.evt.eigen',body).forEach(function(el){el.onclick=function(){
+    eigenFormOeffnen(el.dataset.eig);};});
+  var prev=$('.tagprev',body), next=$('.tagnext',body);
+  function blaettern(schritt){
+    var alle=DAYS.slice(0, slots.some(function(x){return x.day==='So';})?7:6);
+    var i=alle.indexOf(state.ui.planTag)+schritt;
+    if(i<0||i>=alle.length) return;
+    state.ui.planTag=alle[i]; saveState(); drawPlan();
+  }
+  if(prev) prev.onclick=function(){blaettern(-1);};
+  if(next) next.onclick=function(){blaettern(1);};
+}
+function syncCourse(id){
+  refreshById(id);
+  updateCounts(); refreshClashHints(); runFilter();
+}
+
+/* ═══════════════ ICS-Export ═══════════════ */
+function icsDate(d,mins){
+  function p(n){return (n<10?'0':'')+n;}
+  return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'T'+
+         p(Math.floor(mins/60))+p(mins%60)+'00';
+}
+function buildICS(){
+  var L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//HfMT Stundenplaner//DE','CALSCALE:GREGORIAN'];
+  var ICSDAY={Mo:'MO',Di:'TU',Mi:'WE',Do:'TH',Fr:'FR',Sa:'SA',So:'SU'};
+  var idx=DAYS.reduce(function(o,d,i){o[d]=i;return o;},{});
+  var n=0;
+  planCourses().forEach(function(c){
+    var st=statusOf(c.id);
+    mergedTermine(c).forEach(function(m){
+      var s=toMin(m.start),e=toMin(m.end);
+      if(!m.day||s==null||e==null||e<=s) return;
+      var block=isBlockish(m);
+      /* Blocktermine: je Datum ein Einzeleintrag (sie wurden nur fürs Raster
+         zusammengefasst). Wöchentliche Termine: ein Eintrag mit Wiederholung. */
+      var starts=block ? (m.fromDates.length?m.fromDates:[m.from]) : [m.from];
+      var want=(idx[m.day]+1)%7;   /* JS-Wochentag, 0 = Sonntag */
+      starts.forEach(function(fs,k){
+        var from=toDate(fs)||new Date();
+        var d=new Date(from.getTime()), guard=0;
+        while(d.getDay()!==want && guard++<7) d.setDate(d.getDate()+1);
+        L.push('BEGIN:VEVENT');
+        L.push('UID:hfmt-'+c.id+'-'+m.day+'-'+(m.start||'').replace(':','')+'-'+k+'@local');
+        L.push('DTSTAMP:'+icsDate(new Date(),0).slice(0,8)+'T000000Z');
+        L.push('DTSTART:'+icsDate(d,s));
+        L.push('DTEND:'+icsDate(d,e));
+        var to=toDate(m.to);
+        if(!block && to){
+          var u=new Date(to.getTime()); u.setDate(u.getDate()+1);
+          L.push('RRULE:FREQ=WEEKLY;UNTIL='+icsDate(u,0).slice(0,8)+'T000000Z');
+        }
+        L.push('SUMMARY:'+icsEsc((st==='vielleicht'?t('ics.maybe'):'')+c.nr+' '+c.name));
+        if(m.rooms.length) L.push('LOCATION:'+icsEsc(m.rooms.join(' / ')));
+        var desc=[c.typ,c.persons.join(', '),m.rhythm,state.notes[c.id]||''].filter(Boolean).join(' | ');
+        if(desc) L.push('DESCRIPTION:'+icsEsc(desc));
+        L.push('END:VEVENT'); n++;
+      });
+    });
+  });
+  /* Eigene Termine: wöchentlich über den Semesterzeitraum des Katalogs */
+  var sr=semesterRange();
+  (state.eigene||[]).forEach(function(ev){
+    var s0=toMin(ev.von), e0=toMin(ev.bis);
+    if(!ev.tag||s0==null||e0==null||e0<=s0) return;
+    var want=(idx[ev.tag]+1)%7;
+    var d=new Date(sr.from.getTime()), guard=0;
+    while(d.getDay()!==want && guard++<7) d.setDate(d.getDate()+1);
+    var bis=new Date(sr.to.getTime()); bis.setDate(bis.getDate()+1);
+    L.push('BEGIN:VEVENT');
+    L.push('UID:hfmt-eigen-'+ev.id+'@local');
+    L.push('DTSTAMP:'+icsDate(new Date(),0).slice(0,8)+'T000000Z');
+    L.push('DTSTART:'+icsDate(d,s0));
+    L.push('DTEND:'+icsDate(d,e0));
+    L.push('RRULE:FREQ=WEEKLY;UNTIL='+icsDate(bis,0).slice(0,8)+'T000000Z');
+    L.push('SUMMARY:'+icsEsc(ev.titel));
+    if(ev.raum) L.push('LOCATION:'+icsEsc(ev.raum));
+    if(ev.notiz) L.push('DESCRIPTION:'+icsEsc(ev.notiz));
+    L.push('END:VEVENT'); n++;
+  });
+  L.push('END:VCALENDAR');
+  return n?L.join('\r\n'):null;
+}
+/* Zeitraum des Semesters aus den Kursterminen ableiten (für eigene Termine) */
+function semesterRange(){
+  var from=null,to=null;
+  if(CAT) CAT.courses.forEach(function(c){
+    c.termine.forEach(function(r){
+      var f=toDate(r.from), t=toDate(r.to);
+      if(f&&(!from||f<from)) from=f;
+      if(t&&(!to ||t>to ))  to=t;
+    });
+  });
+  if(!from) from=new Date();
+  if(!to){ to=new Date(from.getTime()); to.setDate(to.getDate()+7*20); }
+  return {from:from,to:to};
+}
+function icsEsc(s){return String(s).replace(/([,;\\])/g,'\\$1').replace(/\r?\n/g,'\\n');}
+function download(name,text,mime){
+  var b=new Blob([text],{type:(mime||'text/plain')+';charset=utf-8'});
+  var u=URL.createObjectURL(b), a=document.createElement('a');
+  a.href=u; a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(function(){URL.revokeObjectURL(u); a.remove();},500);
+}
+
+/* ═══════════════ Standort-Chips ═══════════════ */
+function buildOrte(){
+  var freq={};
+  CAT.courses.forEach(function(c){c.orte.forEach(function(o){freq[o]=(freq[o]||0)+1;});});
+  ORTE_BEKANNT={}; Object.keys(freq).forEach(function(o){ORTE_BEKANNT[o]=1;});
+  orteAll=Object.keys(freq).filter(function(o){return freq[o]>=3;})
+          .sort(function(a,b){return freq[b]-freq[a];}).slice(0,8);
+  var box=$('#orteChips'); box.innerHTML='';
+  if(!orteAll.length){$('#orteLbl').hidden=true; return;}
+  $('#orteLbl').hidden=false;
+  state.ui.orte=state.ui.orte||{};
+  var withOrt=CAT.courses.filter(function(c){return c.orte.length;}).length;
+  var labels=orteAll.slice();
+  if(withOrt<CAT.courses.length) labels.push('(ohne)');
+  labels.forEach(function(o){
+    var b=document.createElement('button'); b.className='chip'; b.type='button';
+    b.textContent=(o==='(ohne)'?t('f.noLocation'):o)+(freq[o]?' '+freq[o]:'');
+    function paint(){var on=state.ui.orte[o]!==false;
+      b.classList.toggle('on',on); b.classList.toggle('off',!on);}
+    b.onclick=function(){state.ui.orte[o]=(state.ui.orte[o]===false); saveState(); paint(); runFilter();};
+    paint(); box.appendChild(b);
+  });
+}
+
+/* ═══════════════ App-Start ═══════════════ */
+function buildApp(cat){
+  CAT=cat;
+  loadState();
+
+  $('#docTitle').textContent=cat.title;
+  var timed=cat.courses.filter(function(c){
+    return c.termine.some(function(r){return r.day&&r.start;});}).length;
+  var sub=esc(cat.semester)+' &nbsp;·&nbsp; '+t('doc.courses',cat.courses.length)+
+    ' &nbsp;·&nbsp; '+t('doc.timed',timed);
+  var mtimes=SOURCES.map(function(sq){return sq.mtime;}).filter(Boolean);
+  var aeltest=mtimes.length?Math.min.apply(null,mtimes):0;
+  if(aeltest){
+    var tage=Math.floor((Date.now()-aeltest)/86400000);
+    var d=new Date(aeltest);
+    var ds=('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
+    sub+='<br><span class="stand'+(tage>60?' alt':'')+'">'+
+         (SOURCES.length>1?t('doc.standOldest',SOURCES.length,ds):t('doc.stand',ds))+
+         (tage>0?t(tage===1?'doc.standDay':'doc.standDays',tage):t('doc.standToday'))+
+         (tage>60?t('doc.standOld'):'')+'</span>';
+  }
+  $('#docSub').innerHTML=sub;
+
+  var host=$('#catalog'); host.innerHTML='';
+  cat.nodes.forEach(function(n){
+    host.appendChild(n.kind==='sec'?renderSection(n):renderCourse(n));});
+
+  allK=$$('article.kurs',host);
+  allS=$$('section.sec',host);
+  allK.forEach(function(a){courseById[a.dataset.id]=a._course;});
+  /* Rubrik der Bereichsebene merken, für die Bereichswahl */
+  BEREICH_LVL=bestimmeBereichsEbene();
+  function topOf(el){
+    var t=el.closest('section.sec[data-lvl="'+BEREICH_LVL+'"]');
+    return t?t.id:'';
+  }
+  allK.forEach(function(a){a.dataset.top=topOf(a);});
+  allS.forEach(function(el){el._top=el._sec.level===BEREICH_LVL?el.id:topOf(el);});
+
+  buildOrte(); buildBereiche(); renderQuellen(); buildTOC(); applySectionHiding();
+  document.body.classList.toggle('compact',!!state.ui.compact);
+  document.body.classList.toggle('show-hidden',!!state.ui.showHidden);
+  $('#compactBtn').classList.toggle('on',!!state.ui.compact);
+  $('#fHidden').classList.toggle('on',!!state.ui.showHidden);
+  $('#fPicked').classList.toggle('on',!!state.ui.onlyPicked);
+  $('#tEvtl').classList.toggle('on',state.ui.showEvtl!==false);
+  $('#tBlock').classList.toggle('on',state.ui.showBlock!==false);
+  $('#tDay').classList.toggle('on',!!state.ui.planTag);
+
+  updateCounts(); refreshClashHints(); runFilter();
+  $('#screenStart').hidden=true; $('#screenApp').hidden=false;
+  syncKopfhoehen();
+  window.scrollTo(0,0);
+}
+
+/* Mehrere Dateien nacheinander einlesen; die erste ersetzt optional alles */
+function handleFiles(files, ersetzen){
+  var liste=[].slice.call(files||[]);
+  if(!liste.length) return;
+  var err=$('#startErr'); if(err) err.hidden=true;
+  var fehler=[];
+  function zeigeFehler(){
+    if(!fehler.length) return;
+    var ziel=$('#startErr');
+    if($('#screenApp').hidden===false && CAT){ alert(fehler.join('\n')); return; }
+    if(ziel){ ziel.textContent=fehler.join(' '); ziel.hidden=false; }
+  }
+  (function naechste(i,ersetzeJetzt){
+    if(i>=liste.length){ zeigeFehler(); return; }
+    var file=liste[i];
+    if(file.size>60*1024*1024){
+      fehler.push(file.name+': '+t('err.tooBig')); naechste(i+1,ersetzeJetzt); return;
+    }
+    var fr=new FileReader();
+    fr.onload=function(){
+      try{ quelleHinzu(String(fr.result), file.name, file.lastModified||0, ersetzeJetzt); }
+      catch(e){ fehler.push(file.name+': '+(e.message||String(e))); }
+      naechste(i+1,false);
+    };
+    fr.onerror=function(){ fehler.push(file.name+': '+t('err.unreadable')); naechste(i+1,ersetzeJetzt); };
+    fr.readAsText(file,'utf-8');
+  })(0, ersetzen!==false);
+}
+
+/* ═══════════════ Umgebung prüfen ═══════════════
+   Der Speicher hängt an der Herkunft der Seite. Wer die Datei in einer
+   Online-Vorschau (OneDrive, Mail-Anhang) öffnet, verliert seine Auswahl
+   spätestens beim späteren Herunterladen — darauf weisen wir vorher hin. */
+function speicherGeht(){
+  try{ localStorage.setItem('__probe','1'); localStorage.removeItem('__probe'); return true; }
+  catch(e){ return false; }
+}
+function checkEnv(){
+  var w=$('#envWarn'), msg;
+  if(!speicherGeht()){
+    w.className='envwarn bad';
+    msg=t('env.bad');
+  } else if(location.protocol!=='file:' && !istGehostet()){
+    w.className='envwarn tip';
+    msg=t('env.tip');
+  } else { w.hidden=true; return; }
+  w.innerHTML='<span>'+msg+'</span><button type="button" class="envclose" '+
+              'title="'+esc(t('env.close'))+'">✕</button>';
+  w.hidden=false;
+  $('.envclose',w).onclick=function(){w.hidden=true;};
+}
+checkEnv();
+
+/* ─── "Fragen?" — auf Startseite und am Ende des Katalogs ─── */
+function kontaktZeile(){
+  if(KONTAKT_MAIL)
+    return esc(t('help.mail'))+'<a href="mailto:'+esc(KONTAKT_MAIL)+'">'+
+           esc(KONTAKT_MAIL)+'</a>';
+  if(KONTAKT_NAME) return esc(t('help.ask',KONTAKT_NAME));
+  return esc(t('help.askNone'));
+}
+function renderHelp(){
+  var h=
+    '<h2>'+t('help.title')+'</h2>'+
+    '<ul class="helplist">'+
+      '<li><b>'+t('help.q1')+'</b><br>'+t('help.a1')+'</li>'+
+      '<li><b>'+t('help.q2')+'</b><br>'+t('help.a2')+'</li>'+
+      '<li><b>'+t('help.q3')+'</b><br>'+t('help.a3')+'</li>'+
+      '<li><b>'+t('help.q4')+'</b><br>'+kontaktZeile()+'</li>'+
+    '</ul>'+
+    '<p class="mini" style="margin-bottom:0">'+t('help.disclaimer')+'</p>';
+  ['#helpStart','#helpApp'].forEach(function(sel){
+    var el=$(sel); if(el) el.innerHTML=h;
+  });
+}
+renderHelp();
+
+/* ═══════════════ Beispielverzeichnisse ═══════════════
+   Nachladbar nur über http(s): aus einer lokal geöffneten Kopie heraus
+   dürfen Browser keine Nachbardateien lesen, der Knopf wäre dort tot. */
+function beispieleMoeglich(){
+  return BEISPIELE.length>0 && /^https?:$/.test(location.protocol);
+}
+function renderBeispiele(){
+  var karte=$('#bspCard');
+  if(!beispieleMoeglich()){ karte.hidden=true; return; }
+  karte.hidden=false;
+  var ueberschrift = BEISPIELE.length===1
+        ? t('bsp.title', BEISPIELE[0].titel)
+        : t('bsp.titlePl');
+  var h='<h2>'+esc(ueberschrift)+'</h2><p class="mini" style="margin:0">'+
+        esc(t('bsp.lead'))+'</p><div class="bsprow">';
+  BEISPIELE.forEach(function(b,i){
+    var d=b.stand?b.stand.split('-'):null;
+    var ds=d?(d[2]+'.'+d[1]+'.'+d[0]):'';
+    h+='<button data-bsp="'+i+'">'+esc(t('bsp.load',b.titel))+
+       (ds?'<small>'+esc(t('bsp.stand',ds))+'</small>':'')+'</button>';
+  });
+  h+='</div><p class="hinweis bspwarn">'+t('bsp.warn')+'</p>';
+  karte.innerHTML=h;
+  $$('[data-bsp]',karte).forEach(function(btn){
+    btn.onclick=function(){ ladeBeispiel(BEISPIELE[+btn.dataset.bsp], btn); };
+  });
+}
+function ladeBeispiel(b,btn){
+  var err=$('#startErr'); err.hidden=true;
+  var alt=btn.innerHTML; btn.disabled=true; btn.textContent='…';
+  fetch(b.datei).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.text();
+  }).then(function(xml){
+    /* Exportdatum aus der Konfiguration, nicht vom Server — sonst meldet
+       die Altersanzeige das Deploy-Datum statt des echten Stands. */
+    var stand=b.stand?Date.parse(b.stand+'T12:00:00'):0;
+    quelleHinzu(xml, b.datei, stand||0, true);
+  }).catch(function(e){
+    err.textContent=t('bsp.fail')+' ('+(e.message||e)+')'; err.hidden=false;
+    btn.disabled=false; btn.innerHTML=alt;
+  });
+}
+
+/* ─── Sprache anwenden ─── */
+function qisLinkHtml(){
+  return QIS_URL
+    ? '<a href="'+esc(QIS_URL)+'" target="_blank" rel="noopener">'+esc(QIS_NAME)+'</a>'
+    : '<span class="kbd">'+esc(t('start.noLink'))+'</span>';
+}
+function applyI18n(){
+  document.documentElement.lang=LANG;
+  document.title=t('app.title');
+  $$('[data-i18n]').forEach(function(el){el.textContent=t(el.getAttribute('data-i18n'));});
+  $$('[data-i18n-html]').forEach(function(el){el.innerHTML=t(el.getAttribute('data-i18n-html'));});
+  $$('[data-i18n-ph]').forEach(function(el){el.placeholder=t(el.getAttribute('data-i18n-ph'));});
+  $$('[data-i18n-title]').forEach(function(el){el.title=t(el.getAttribute('data-i18n-title'));});
+  var st=$('#steps'); if(st) st.innerHTML=t('start.steps').replace('{LINK}',qisLinkHtml());
+  var pl=$('#planLbl'); if(pl) pl.textContent=t('bar.plan');
+  [['#langBtn'],['#langBtnStart']].forEach(function(p){
+    var b=$(p[0]); if(b){ b.textContent=t('lang.other'); b.title=t('lang.title'); }});
+  var ef=$('#efSave'); if(ef) ef.textContent=t(efAktuell?'ef.update':'ef.save');
+  renderBeispiele();
+  renderHelp();
+}
+function flushState(){
+  clearTimeout(saveTimer);
+  try{localStorage.setItem(stateKey,JSON.stringify(state));}catch(e){}
+}
+function setLang(l){
+  LANG=(l==='en')?'en':'de';
+  try{localStorage.setItem('hfmt-planer:lang',LANG);}catch(e){}
+  flushState();
+  applyI18n(); checkEnv();
+  if(CAT) buildApp(CAT);            /* Katalog in der neuen Sprache neu aufbauen */
+}
+
+/* ─── Startbildschirm verdrahten ─── */
+(function initStart(){
+  applyI18n();
+  $('#langBtn').onclick=function(){setLang(LANG==='de'?'en':'de');};
+  $('#langBtnStart').onclick=function(){setLang(LANG==='de'?'en':'de');};
+
+  var drop=$('#drop'), input=$('#fileInput');
+  $('#pickBtn').onclick=function(){input.click();};
+  input.onchange=function(){handleFiles(input.files,true); input.value='';};
+  ['dragenter','dragover'].forEach(function(ev){
+    drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('over');});});
+  ['dragleave','drop'].forEach(function(ev){
+    drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove('over');});});
+  drop.addEventListener('drop',function(e){
+    var fs=e.dataTransfer&&e.dataTransfer.files;
+    if(fs&&fs.length) handleFiles(fs,true);});
+
+  /* zuletzt geladenes Verzeichnis anbieten */
+  /* Zuletzt geladene Verzeichnisse anbieten. Ältere Speicherstände lagen
+     unter 'lastXml' — die werden einmalig übernommen. */
+  idbGet('sources').then(function(list){
+    if(list && list.length) return list;
+    return idbGet('lastXml').then(function(x){
+      if(!x) return null;
+      return idbGet('lastMeta').then(function(m){
+        return [{id:neueQuellenId(), xml:x, name:(m&&m.dateiName)||'',
+                 mtime:(m&&m.dateiZeit)||0, title:(m&&m.title)||'', semester:(m&&m.semester)||''}];
+      }).catch(function(){ return [{id:neueQuellenId(),xml:x,name:'',mtime:0}]; });
+    });
+  }).then(function(list){
+    if(!list || !list.length) return;
+    var row=$('#resumeRow'), btn=$('#resumeBtn');
+    var bez=list.map(function(sq){return sq.title||sq.name||'?';}).join(' + ');
+    var sem=list[0] && list[0].semester;
+    btn.textContent=t('start.resume', bez+(sem?' ('+sem+')':''));
+    btn.onclick=function(){
+      try{
+        SOURCES=list.map(function(sq){
+          return {id:sq.id||neueQuellenId(), xml:sq.xml, name:sq.name||'',
+                  mtime:sq.mtime||0, title:sq.title||'', semester:sq.semester||'', n:sq.n||0};
+        });
+        rebuildCatalog(); buildApp(CAT);
+      }catch(e){ $('#startErr').textContent=e.message||String(e); $('#startErr').hidden=false; }
+    };
+    row.hidden=false;
+    /* automatisch öffnen, wenn es dieselbe Sitzung fortsetzt */
+    try{ if(sessionStorage.getItem('hfmt-autoload')==='1') btn.click(); }catch(e){}
+  }).catch(function(){});
+})();
+
+/* ─── App-Bedienung verdrahten ─── */
+$('#q').addEventListener('input',runFilter);
+$('#collapseAll').onclick=function(){allS.forEach(function(s){s.classList.add('collapsed');});};
+$('#expandAll').onclick=function(){allS.forEach(function(s){s.classList.remove('collapsed');});};
+$('#compactBtn').onclick=function(){
+  state.ui.compact=!state.ui.compact; saveState();
+  document.body.classList.toggle('compact',state.ui.compact);
+  this.classList.toggle('on',state.ui.compact);};
+$('#fPicked').onclick=function(){
+  state.ui.onlyPicked=!state.ui.onlyPicked; saveState();
+  this.classList.toggle('on',state.ui.onlyPicked); runFilter();};
+$('#fHidden').onclick=function(){
+  state.ui.showHidden=!state.ui.showHidden; saveState();
+  document.body.classList.toggle('show-hidden',state.ui.showHidden);
+  this.classList.toggle('on',state.ui.showHidden); runFilter();};
+/* Kopfleiste und Filterzeile umbrechen je nach Breite unterschiedlich —
+   ihre echten Höhen messen, damit die Klebepositionen stimmen. */
+function syncKopfhoehen(){
+  var b=document.querySelector('.bar'), f=document.querySelector('.filters');
+  if(b) document.documentElement.style.setProperty('--barh',
+          Math.round(b.getBoundingClientRect().height)+'px');
+  if(f) document.documentElement.style.setProperty('--filterh',
+          Math.round(f.getBoundingClientRect().height)+'px');
+}
+window.addEventListener('resize',syncKopfhoehen);
+
+/* Inhaltsverzeichnis als Schublade (Handy) */
+function tocAuf(){ $('#toc').classList.add('open'); $('#tocBack').hidden=false; }
+function tocZu(){ $('#toc').classList.remove('open'); $('#tocBack').hidden=true; }
+$('#tocBtn').onclick=function(){
+  if($('#toc').classList.contains('open')) tocZu(); else tocAuf();};
+$('#tocBack').onclick=tocZu;
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape' && $('#toc').classList.contains('open')) tocZu();});
+window.addEventListener('resize',function(){ if(window.innerWidth>880) tocZu(); });
+
+$('#printBtn').onclick=function(){window.print();};
+$('#newFileBtn').onclick=zurueckZumStart;
+$('#srcBtn').onclick=function(){
+  var p=$('#srcPanel'); p.hidden=!p.hidden; renderQuellen();
+  if(!p.hidden) syncKopfhoehen();};
+$('#addInput').onchange=function(){ handleFiles(this.files,false); this.value=''; };
+
+var plan=$('#plan');
+$('#planBtn').onclick=function(){plan.classList.add('open');drawPlan();};
+$('#planClose').onclick=function(){plan.classList.remove('open');eigenFormSchliessen();};
+plan.addEventListener('click',function(e){if(e.target===plan)plan.classList.remove('open');});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape'||!plan.classList.contains('open')) return;
+  if(!$('#eigenForm').hidden) eigenFormSchliessen();   /* erst Formular, dann Fenster */
+  else plan.classList.remove('open');});
+$('#eigenAdd').onclick=function(){
+  if($('#eigenForm').hidden || efAktuell) eigenFormOeffnen(null);
+  else eigenFormSchliessen();};
+$('#efSave').onclick=eigenSpeichern;
+$('#efCancel').onclick=eigenFormSchliessen;
+$('#efDel').onclick=eigenLoeschen;
+$('#eigenForm').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){ e.preventDefault(); eigenSpeichern(); }});
+$('#tEvtl').onclick=function(){
+  state.ui.showEvtl=state.ui.showEvtl===false; saveState();
+  this.classList.toggle('on',state.ui.showEvtl!==false); drawPlan();};
+$('#tDay').onclick=function(){
+  if(state.ui.planTag){ state.ui.planTag=null; }
+  else {
+    /* beim Umschalten den heutigen Tag zeigen, sonst Montag */
+    var heute=DAYS[(new Date().getDay()+6)%7];
+    state.ui.planTag=(heute==='Sa'||heute==='So')?'Mo':heute;
+  }
+  saveState(); this.classList.toggle('on',!!state.ui.planTag); drawPlan();};
+$('#tBlock').onclick=function(){
+  state.ui.showBlock=state.ui.showBlock===false; saveState();
+  this.classList.toggle('on',state.ui.showBlock!==false); drawPlan();};
+$('#planPrint').onclick=function(){
+  document.body.classList.add('printing-plan'); window.print();
+  setTimeout(function(){document.body.classList.remove('printing-plan');},600);};
+$('#planIcs').onclick=function(){
+  var ics=buildICS();
+  if(!ics){alert(t('plan.icsNone'));return;}
+  download('stundenplan.ics',ics,'text/calendar');};
+$('#planExport').onclick=function(){
+  download('stundenplan-auswahl.json',JSON.stringify({
+    v:2, katalog:CAT?CAT.title:'', semester:CAT?CAT.semester:'',
+    status:state.status, notes:state.notes, hiddenSections:state.hiddenSections,
+    eigene:state.eigene||[]
+  },null,1),'application/json');};
+$('#planImport').onclick=function(){$('#importInput').click();};
+$('#importInput').onchange=function(){
+  var f=this.files[0]; if(!f) return;
+  var fr=new FileReader();
+  fr.onload=function(){
+    try{
+      var d=JSON.parse(String(fr.result));
+      if(!d||!d.status) throw new Error('bad');
+      state.status=d.status||{}; state.notes=d.notes||{};
+      state.hiddenSections=d.hiddenSections||{};
+      state.eigene=Array.isArray(d.eigene)?d.eigene:[];
+      saveState();
+      allK.forEach(refreshCourse); applySectionHiding(); buildTOC();
+      updateCounts(); refreshClashHints(); runFilter(); drawPlan();
+    }catch(e){ alert(t('plan.importFail')); }
+  };
+  fr.readAsText(f,'utf-8');
+  this.value='';
+};
+window.addEventListener('beforeunload',function(){
+  try{ if(CAT) sessionStorage.setItem('hfmt-autoload','1'); }catch(e){}
+});
+</script>
+</body>
+</html>

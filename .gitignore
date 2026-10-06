@@ -1,0 +1,10 @@
+# macOS-Metadaten
+.DS_Store
+
+# Persönliche Notizen – nicht ins öffentliche Repo
+Info.txt
+
+# Eigene Arbeitskopien von Exporten bleiben lokal …
+*.xml
+# … nur die ausdrücklich mitgelieferte Beispieldatei nicht.
+!beispiel-emp-igp.xml
