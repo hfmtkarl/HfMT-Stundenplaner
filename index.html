@@ -94,9 +94,22 @@ main .card.help{margin-top:3rem;background:var(--soft);}
 .filters{position:sticky;top:var(--barh,var(--bar));z-index:35;display:flex;gap:.4rem;align-items:center;
  flex-wrap:wrap;padding:.4rem .8rem;background:var(--soft);border-bottom:1px solid var(--line);font-size:13px;}
 .filters .lbl{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin-right:.1rem;}
-.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:.2rem .7rem;cursor:pointer;font-size:12.5px;}
+.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:.2rem .7rem;
+ cursor:pointer;font-size:12.5px;color:var(--fg);}
 .chip.on{background:var(--accent);color:#fff;border-color:var(--accent);}
 .chip.off{opacity:.5;text-decoration:line-through;}
+/* Bereichswahl soll wie die Chips daneben aussehen, nicht wie ein Systemfeld */
+#sgSel{appearance:none;-webkit-appearance:none;-moz-appearance:none;
+ border:1px solid var(--line);background-color:#fff;border-radius:20px;
+ padding:.37rem 1.8rem .37rem .75rem;font:inherit;font-size:12.5px;line-height:1.35;
+ color:var(--fg);cursor:pointer;max-width:17rem;text-overflow:ellipsis;
+ background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236b6b70' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+ background-repeat:no-repeat;background-position:right .6rem center;background-size:9px 6px;}
+#sgSel:hover{background-color:var(--soft);}
+#sgSel:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft);}
+#sgSel.aktiv{background-color:var(--accent);border-color:var(--accent);color:#fff;
+ background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23ffffff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");}
+#sgSel.aktiv:hover{filter:brightness(1.08);}
 #srcBtn{border-color:var(--accent);color:var(--accent);}
 #srcBtn.on{color:#fff;}
 
@@ -1658,9 +1671,12 @@ function buildBereiche(){
   if(state.ui.bereich && !tops.some(function(el){return el.id===state.ui.bereich;}))
     state.ui.bereich='';
   sel.value=state.ui.bereich||'';
+  sel.classList.toggle('aktiv',!!state.ui.bereich);
   sel.hidden=false; lbl.hidden=false;
   sel.onchange=function(){
-    state.ui.bereich=sel.value; saveState(); buildTOC(); runFilter();
+    state.ui.bereich=sel.value; saveState();
+    sel.classList.toggle('aktiv',!!sel.value);
+    buildTOC(); runFilter();
     window.scrollTo(0,0);
   };
 }
