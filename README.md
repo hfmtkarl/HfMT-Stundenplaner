@@ -1,9 +1,9 @@
 # Vorlesungsverzeichnis & Stundenplaner
 
-Dieses Tool dient dazu die Vorlesungsverzeichnisse der HfMT Köln übersichtlicher anzuzeigen und Stundenpläne zusammenzustellen.
-Alles steckt in einer einzelnen HTML-Datei, die aus dem XML-Export eines Vorlesungsverzeichnisses (QIS/HISinOne)
+Eine einzelne HTML-Datei, die aus dem XML-Export eines QIS/HISinOne-Vorlesungsverzeichnisses
 eine durchsuchbare Übersicht macht — mit Stundenplan, Überschneidungswarnung und
-Kalenderexport. Alles läuft lokal im Browser, die index.hmtl Datei kann auch heruntergeladen werden und ohne Internetverbindung genutzt werden.
+Kalenderexport. Kein Backend, keine Installation, keine Datenübertragung: alles läuft
+im Browser — ob über eine gehostete Adresse oder als lokal geöffnete Datei.
 
 Gebaut für die HfMT Köln, funktioniert aber mit jedem Vorlesungsverzeichnis im
 gleichen XML-Format.
@@ -19,7 +19,7 @@ gleichen XML-Format.
 
 ## Benutzen
 
-1. **[Seite öffnen](https://hfmtkarl.github.io/HfMT-Stundenplaner/)**
+1. **[Seite öffnen](https://DEINNAME.github.io/stundenplaner/)**
 2. XML-Datei aus dem Campus-Portal herunterladen (die Anleitung dazu steht auf der Startseite)
 3. Datei auf die Seite ziehen — fertig
 
@@ -29,7 +29,9 @@ eine Momentaufnahme und wird nicht gepflegt; ab 60 Tagen weist die Seite selbst 
 Für die echte Planung gilt der eigene, frische Export. Der Knopf erscheint nur auf der
 gehosteten Fassung: eine lokal geöffnete Kopie darf keine Nachbardateien lesen.
 
-Deine Auswahl bleibt im Browser gespeichert, auf deinem Gerät. Es wird nichts hochgeladen.
+Deine Auswahl bleibt im Browser gespeichert, auf deinem Gerät — sowohl beim Aufruf über die
+Web-Adresse als auch bei einer heruntergeladenen Kopie (beide haben getrennten Speicher).
+Es wird nichts hochgeladen.
 
 ### XML-Datei besorgen
 
@@ -55,6 +57,8 @@ Das dauert bei großen Bäumen ein bis zwei Minuten. Und es geht nur eingeloggt.
 - **Export**: Kalenderdatei (.ics), Auswahl als JSON sichern/laden, Drucken als PDF
 - **Mehrere Verzeichnisse gleichzeitig** — z. B. zwei Studiengänge; jede Quelle wird
   eine eigene oberste Rubrik und lässt sich einzeln wieder entfernen
+- **Fassungsvergleich**: lädst du einen neueren Export desselben Verzeichnisses, zeigt die
+  Seite, was neu, entfallen und geändert ist — zuerst das, was deine eigene Auswahl betrifft
 - **Zweisprachig** Deutsch/Englisch
 - Läuft auf dem Handy
 
@@ -66,9 +70,9 @@ Mit GitHub Pages: Repository anlegen, Datei als `index.html` hochladen,
 unter *Settings → Pages* als Quelle `main` / `root` wählen. Nach ein bis zwei Minuten
 ist die Seite erreichbar.
 
-Der Hinweis „erst herunterladen, dann planen" blendet sich auf `*.github.io`
-(sowie Netlify, Vercel, Cloudflare Pages) automatisch aus — dort wird ja zuverlässig
-gespeichert. Bei eigener Domain diese in `GEHOSTET_HOSTS` eintragen.
+Der Warnhinweis zum Speichern blendet sich auf `*.github.io` (sowie Netlify, Vercel,
+Cloudflare Pages) automatisch aus — dort wird ja zuverlässig gespeichert. Bei eigener
+Domain diese in `GEHOSTET_HOSTS` eintragen, sonst erscheint er dort fälschlich.
 
 ## Anpassen
 
@@ -89,7 +93,8 @@ umformulieren oder eine weitere Sprache ergänzen.
 
 Die hochgeladene XML wird ausschließlich im Browser verarbeitet. Auswahl, Notizen und
 eigene Termine liegen in `localStorage`, die zuletzt geladene Datei in `IndexedDB` —
-beides nur lokal auf dem Gerät. Es gibt keinen Server, keine Analyse, keine Cookies.
+beides nur lokal auf dem Gerät und getrennt je Adresse. Es gibt kein Backend, keine
+Analyse, keine Cookies — die gehostete Seite liefert nur statische Dateien aus.
 
 ## Lizenz
 
