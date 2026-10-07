@@ -52,9 +52,10 @@ ol.steps .mini{display:inline-block;margin-top:.1rem;}
 .diffpanel .dhead{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.5rem;}
 .diffpanel h3{margin:0;font-size:1rem;color:var(--accent);flex:1;}
 .diffpanel .dsum{color:var(--muted);font-size:.85rem;}
-.diffpanel .dclose{border:1px solid var(--line);background:#fff;border-radius:7px;
- padding:.2rem .6rem;font-size:12px;cursor:pointer;flex:none;}
-.diffpanel .dclose:hover{background:var(--soft);}
+.diffpanel .dclose,.diffpanel .dmore{border:1px solid var(--line);background:#fff;
+ border-radius:7px;padding:.2rem .6rem;font-size:12px;cursor:pointer;flex:none;}
+.diffpanel .dclose:hover,.diffpanel .dmore:hover{background:var(--soft);}
+.diffpanel .dmore{border-color:var(--accent);color:var(--accent);padding:.35rem .8rem;font-size:12.5px;}
 .diffpanel h4{margin:.8rem 0 .3rem;font-size:.75rem;letter-spacing:.06em;
  text-transform:uppercase;color:var(--muted);}
 .diffpanel h4.mine{color:var(--warn);}
@@ -66,6 +67,12 @@ ol.steps .mini{display:inline-block;margin-top:.1rem;}
 .diffpanel .dalt{text-decoration:line-through;opacity:.7;}
 .diffpanel .dneu{color:var(--fg);font-weight:600;}
 .diffpanel .dmine{border-left:3px solid var(--warn);background:var(--warn-soft) !important;}
+.diffpanel .dmild{border-left:3px solid var(--evtl);background:var(--evtl-soft) !important;}
+.diffpanel h4.mild{color:#7a5310;}
+.diffpanel .dnames{border:1px solid var(--line);background:#fff;border-radius:7px;
+ padding:.2rem .6rem;font-size:12px;cursor:pointer;flex:none;}
+.diffpanel .dnames:hover{background:var(--soft);}
+.diffpanel .dmorewrap{margin:.3rem 0 .2rem;}
 @media print{.diffpanel{display:none !important;}}
 
 .card.bsp{border-color:var(--evtl);background:var(--evtl-soft);}
@@ -151,8 +158,10 @@ main .card.help{margin-top:3rem;background:var(--soft);}
 .srcpanel .snm{flex:1;min-width:0;}
 .srcpanel .snm b{font-weight:700;}
 .srcpanel .sdet{color:var(--muted);font-size:12px;}
-.srcpanel .sonly,.srcpanel .srm{border:1px solid var(--line);background:#fff;border-radius:6px;
- cursor:pointer;font-size:11.5px;padding:.12rem .45rem;flex:none;}
+.srcpanel .sonly,.srcpanel .srm,.srcpanel .supd{border:1px solid var(--line);background:#fff;
+ border-radius:6px;cursor:pointer;font-size:11.5px;padding:.12rem .45rem;flex:none;}
+.srcpanel .supd{border-color:var(--accent);color:var(--accent);font-weight:600;}
+.srcpanel .supd:hover{background:var(--accent-soft);}
 .srcpanel .srm{color:var(--warn);border-color:var(--warn);}
 .srcpanel .sonly:hover{background:var(--soft);}
 .srcpanel .srm:hover{background:var(--warn-soft);}
@@ -490,6 +499,7 @@ mark{background:#ffe9a8;padding:0 .1em;}
     <span id="hiddenInfo" class="mini"></span>
     <button class="chip" id="srcBtn" hidden></button>
     <input type="file" id="addInput" accept=".xml,text/xml,application/xml" multiple hidden>
+    <input type="file" id="updInput" accept=".xml,text/xml,application/xml" hidden>
     <span class="spacer" style="flex:1"></span>
     <span class="lbl" id="sgLbl" hidden data-i18n="f.area"></span>
     <select id="sgSel" hidden></select>
@@ -659,11 +669,11 @@ de:{
  'f.hiddenSec':'{0} Rubrik','f.hiddenSecPl':'{0} Rubriken',
  'f.hiddenCourse':'{0} Veranstaltung','f.hiddenCoursePl':'{0} Veranstaltungen',
 
- 'src.btn':'Quellen ({0})','src.title':'Geladene Verzeichnisse',
+ 'src.btn':'Verzeichnisse ({0})','src.title':'Geladene Verzeichnisse',
  'src.add':'+ Datei hinzufügen','src.replace':'Alle ersetzen',
  'src.only':'nur diese','src.courses':'{0} Veranstaltungen',
  'src.hint':'Mehrere Dateien gleichzeitig möglich — z. B. zwei Studiengänge.',
- 'start.fresh':'<b>Später nochmal reinschauen lohnt sich.</b> Kurz vor und zu Beginn des Semesters kommen noch Veranstaltungen dazu, und Zeiten und Räume ändern sich. Du kannst jederzeit einen neueren Export nachladen — die Seite vergleicht dann selbst und zeigt dir, was neu, entfallen oder geändert ist. Deine Auswahl bleibt dabei erhalten.',
+ 'start.fresh':'<b>Verzeichnis aktuell halten.</b> Kurz vor und zu Beginn des Semesters können noch Veranstaltungen dazu kommen oder Zeiten und Räume ändern sich. Du kannst jederzeit einen neueren Export nachladen — die Seite vergleicht dann selbst und zeigt dir, was neu, entfallen oder geändert ist. Deine Auswahl bleibt dabei erhalten.',
  'src.dupAsk':'„{0}" ({1}) ist bereits geladen.\n\nOK = ersetzen und Änderungen anzeigen\nAbbrechen = zusätzlich laden',
  'diff.title':'Änderungen gegenüber der vorherigen Fassung',
  'diff.sum':'{0} neu · {1} entfallen · {2} geändert',
@@ -673,6 +683,15 @@ de:{
  'diff.gone':'Entfallen ({0})',
  'diff.chg':'Geändert ({0})',
  'diff.more':'… und {0} weitere',
+ 'diff.all':'Alle {0} anzeigen','diff.less':'Weniger anzeigen',
+ 'diff.chgTime':'Termine oder Räume geändert ({0})',
+ 'diff.chgOther':'Sonstiges geändert ({0})',
+ 'diff.chgName':'Nur Titel geändert ({0})',
+ 'diff.mineName':'Davon nur umbenannt',
+ 'diff.hideNames':'Namensänderungen ausblenden',
+ 'diff.showNames':'Namensänderungen zeigen',
+ 'src.update':'aktualisieren','src.updateTitle':'Neueren Export dieses Verzeichnisses laden und Änderungen anzeigen',
+ 'src.updNone':'Die Datei wurde übernommen — inhaltlich gibt es keine Unterschiede zur vorherigen Fassung.',
  'diff.close':'Schließen','diff.none':'(leer)',
  'diff.f.name':'Titel','diff.f.typ':'Art','diff.f.pers':'Leitung',
  'diff.f.sws':'SWS','diff.f.ects':'ECTS','diff.f.termine':'Termine',
@@ -821,11 +840,11 @@ en:{
  'f.hiddenSec':'{0} section','f.hiddenSecPl':'{0} sections',
  'f.hiddenCourse':'{0} course','f.hiddenCoursePl':'{0} courses',
 
- 'src.btn':'Sources ({0})','src.title':'Loaded catalogues',
+ 'src.btn':'Catalogues ({0})','src.title':'Loaded catalogues',
  'src.add':'+ Add file','src.replace':'Replace all',
  'src.only':'only this one','src.courses':'{0} courses',
  'src.hint':'Several files at once are fine — e.g. two degree programmes.',
- 'start.fresh':'<b>It pays to come back later.</b> Just before and at the start of the semester, courses are still added and times and rooms change. You can load a newer export at any time — the page then compares them itself and shows you what is new, removed or changed. Your selection is kept.',
+ 'start.fresh':'<b>Keep the catalogue up to date.</b> Just before and at the start of the semester, courses may still be added or times and rooms may change. You can load a newer export at any time — the page then compares them itself and shows you what is new, removed or changed. Your selection is kept.',
  'src.dupAsk':'“{0}” ({1}) is already loaded.\n\nOK = replace and show what changed\nCancel = load it in addition',
  'diff.title':'Changes compared with the previous version',
  'diff.sum':'{0} new · {1} removed · {2} changed',
@@ -835,6 +854,15 @@ en:{
  'diff.gone':'Removed ({0})',
  'diff.chg':'Changed ({0})',
  'diff.more':'… and {0} more',
+ 'diff.all':'Show all {0}','diff.less':'Show fewer',
+ 'diff.chgTime':'Times or rooms changed ({0})',
+ 'diff.chgOther':'Other changes ({0})',
+ 'diff.chgName':'Title only changed ({0})',
+ 'diff.mineName':'Of these, renamed only',
+ 'diff.hideNames':'Hide title-only changes',
+ 'diff.showNames':'Show title-only changes',
+ 'src.update':'update','src.updateTitle':'Load a newer export of this catalogue and show what changed',
+ 'src.updNone':'The file was loaded — there are no content differences from the previous version.',
  'diff.close':'Close','diff.none':'(empty)',
  'diff.f.name':'Title','diff.f.typ':'Type','diff.f.pers':'Taught by',
  'diff.f.sws':'Hours','diff.f.ects':'ECTS','diff.f.termine':'Times',
@@ -1370,7 +1398,7 @@ function rebuildCatalog(){
    Lädt jemand eine neuere Ausgabe desselben Verzeichnisses, zeigen wir,
    was dazugekommen, weggefallen und geändert ist — zuerst das, was die
    eigene Auswahl betrifft. */
-var LETZTER_DIFF=null;
+var LETZTER_DIFF=null, DIFF_OFFEN={};
 
 function kursSignatur(c){
   return {
@@ -1399,6 +1427,17 @@ function vergleiche(altKurse,neuKurse){
     });
     if(felder.length) geaendert.push({id:id, nr:b[id].nr, name:b[id].name, felder:felder});
   });
+  /* Nach Tragweite ordnen: Termine und Räume zuerst, reine Umbenennungen
+     zuletzt — sonst verschwinden die relevanten Fälle hinter den vielen
+     Titeländerungen. */
+  function gewicht(e){
+    var f=e.felder.map(function(x){return x.feld;});
+    if(f.indexOf('termine')>=0) return 0;
+    if(f.indexOf('typ')>=0) return 1;
+    if(f.indexOf('pers')>=0||f.indexOf('sws')>=0||f.indexOf('ects')>=0) return 2;
+    return 3;
+  }
+  geaendert.sort(function(a,b){return gewicht(a)-gewicht(b);});
   return {dazu:dazu, weg:weg, geaendert:geaendert};
 }
 
@@ -1437,6 +1476,28 @@ function quelleHinzu(xmlText, name, mtime, ersetzen){
   quellenSichern();
   renderDiff();
 }
+/* Eine geladene Datei durch eine neuere Fassung ersetzen. Die Kennung der
+   Quelle bleibt erhalten — damit bleiben auch ausgeblendete Rubriken gültig. */
+function quelleAktualisieren(id, xmlText, name, mtime){
+  var probe=parseSource(xmlText,'probe');
+  var alt=SOURCES.filter(function(sq){return sq.id===id;})[0];
+  LETZTER_DIFF=null; DIFF_OFFEN={};
+  if(alt){
+    try{
+      var d=vergleiche(parseSource(alt.xml,'alt').courses, probe.courses);
+      if(d.dazu.length||d.weg.length||d.geaendert.length){ d.titel=probe.title; LETZTER_DIFF=d; }
+    }catch(e){}
+  }
+  SOURCES=SOURCES.map(function(sq){
+    if(sq.id!==id) return sq;
+    return {id:sq.id, xml:xmlText, name:name||sq.name, mtime:mtime||0,
+            title:probe.title, semester:probe.semester, n:probe.courses.length, label:''};
+  });
+  SOURCES.forEach(function(sq){sq.label='';});
+  rebuildCatalog(); buildApp(CAT); quellenSichern(); renderDiff();
+  if(!LETZTER_DIFF) alert(t('src.updNone'));
+}
+
 function quelleWeg(id){
   SOURCES=SOURCES.filter(function(sq){return sq.id!==id;});
   SOURCES.forEach(function(sq){sq.label='';});
@@ -1755,8 +1816,8 @@ function buildTOC(){
 }
 
 /* ═══════════════ Änderungsübersicht ═══════════════ */
-function diffZeile(e,meins){
-  var h='<li'+(meins?' class="dmine"':'')+'><span class="dnr">'+esc(e.nr||'')+'</span> '+
+function diffZeile(e,klasse){
+  var h='<li'+(klasse?' class="'+klasse+'"':'')+'><span class="dnr">'+esc(e.nr||'')+'</span> '+
         esc(e.name||'');
   (e.felder||[]).forEach(function(f){
     h+='<span class="dfeld">'+esc(t('diff.f.'+f.feld))+': '+
@@ -1765,47 +1826,86 @@ function diffZeile(e,meins){
   });
   return h+'</li>';
 }
+/* Art einer Änderung. "nur Titel" gilt streng: sobald irgendein anderes
+   Feld abweicht, zählt der Eintrag nicht als harmlose Umbenennung. */
+function diffArt(e){
+  var f=(e.felder||[]).map(function(x){return x.feld;});
+  if(f.indexOf('termine')>=0) return 'zeit';
+  if(f.length===1 && f[0]==='name') return 'name';
+  return 'sonst';
+}
 function renderDiff(){
   var p=$('#diffPanel'); if(!p) return;
   var d=LETZTER_DIFF;
   if(!d){ p.hidden=true; p.innerHTML=''; return; }
+  var ohneNamen=!!state.ui.diffOhneNamen;
 
-  /* Was die eigene Auswahl betrifft, kommt zuerst */
   function gewaehlt(id){var st=statusOf(id);return st==='fest'||st==='vielleicht';}
-  var meineAenderungen=d.geaendert.filter(function(e){return gewaehlt(e.id);});
-  var meineWeg=d.weg.filter(function(c){return gewaehlt(c.id);});
+  var zeit =d.geaendert.filter(function(e){return diffArt(e)==='zeit';});
+  var sonst=d.geaendert.filter(function(e){return diffArt(e)==='sonst';});
+  var namen=d.geaendert.filter(function(e){return diffArt(e)==='name';});
+
+  /* Was die eigene Auswahl betrifft, zuerst — Umbenennungen davon getrennt */
+  var meineWeg   =d.weg.filter(function(c){return gewaehlt(c.id);});
+  var meineWichtig=d.geaendert.filter(function(e){
+    return gewaehlt(e.id) && diffArt(e)!=='name'; });
+  var meineNamen =namen.filter(function(e){return gewaehlt(e.id);});
 
   var h='<div class="dhead"><h3>'+esc(t('diff.title'))+'</h3>'+
         '<span class="dsum">'+esc(t('diff.sum',d.dazu.length,d.weg.length,d.geaendert.length))+'</span>'+
+        (namen.length?'<button class="dnames">'+
+           esc(ohneNamen?t('diff.showNames'):t('diff.hideNames'))+'</button>':'')+
         '<button class="dclose">'+esc(t('diff.close'))+'</button></div>';
 
-  if(meineAenderungen.length||meineWeg.length){
+  if(meineWeg.length||meineWichtig.length||(meineNamen.length&&!ohneNamen)){
     h+='<h4 class="mine">'+esc(t('diff.mine'))+'</h4><ul>';
     meineWeg.forEach(function(c){
       h+=diffZeile({nr:c.nr,name:c.name,felder:[{feld:'termine',
-          alt:kursSignatur(c).termine, neu:t('diff.mineGone')}]},true);
+          alt:kursSignatur(c).termine, neu:t('diff.mineGone')}]},'dmine');
     });
-    meineAenderungen.forEach(function(e){ h+=diffZeile(e,true); });
+    meineWichtig.forEach(function(e){ h+=diffZeile(e,'dmine'); });
     h+='</ul>';
+    if(meineNamen.length && !ohneNamen){
+      h+='<h4 class="mild">'+esc(t('diff.mineName'))+'</h4><ul>';
+      meineNamen.forEach(function(e){ h+=diffZeile(e,'dmild'); });
+      h+='</ul>';
+    }
   }
 
-  function block(titel,liste,bauer){
+  /* Je Block eigenes Auf- und Zuklappen */
+  function block(key,titel,liste,bauer){
     if(!liste.length) return '';
+    var offen=!!DIFF_OFFEN[key];
+    var zeige=offen?liste.length:Math.min(6,liste.length);
     var x='<h4>'+esc(titel)+'</h4><ul>';
-    liste.slice(0,12).forEach(function(e){ x+=bauer(e); });
-    if(liste.length>12) x+='<li>'+esc(t('diff.more',liste.length-12))+'</li>';
-    return x+'</ul>';
+    liste.slice(0,zeige).forEach(function(e){ x+=bauer(e); });
+    x+='</ul>';
+    if(liste.length>6)
+      x+='<p class="dmorewrap"><button class="dmore" data-k="'+esc(key)+'">'+
+         esc(offen?t('diff.less'):t('diff.all',liste.length))+'</button></p>';
+    return x;
   }
-  h+=block(t('diff.new',d.dazu.length), d.dazu, function(c){
-       return diffZeile({nr:c.nr,name:c.name},false); });
-  h+=block(t('diff.gone',d.weg.length), d.weg, function(c){
-       return diffZeile({nr:c.nr,name:c.name},false); });
-  h+=block(t('diff.chg',d.geaendert.length),
-           d.geaendert.filter(function(e){return !gewaehlt(e.id);}),
-           function(e){ return diffZeile(e,false); });
+  function schlicht(c){ return diffZeile({nr:c.nr,name:c.name},''); }
+  function voll(e){ return diffZeile(e,''); }
+
+  h+=block('neu',  t('diff.new', d.dazu.length), d.dazu, schlicht);
+  h+=block('weg',  t('diff.gone',d.weg.length),  d.weg,  schlicht);
+  h+=block('zeit', t('diff.chgTime', zeit.length),
+           zeit.filter(function(e){return !gewaehlt(e.id);}), voll);
+  h+=block('sonst',t('diff.chgOther',sonst.length),
+           sonst.filter(function(e){return !gewaehlt(e.id);}), voll);
+  if(!ohneNamen)
+    h+=block('name', t('diff.chgName',namen.length),
+             namen.filter(function(e){return !gewaehlt(e.id);}), voll);
 
   p.innerHTML=h; p.hidden=false;
-  $('.dclose',p).onclick=function(){ LETZTER_DIFF=null; p.hidden=true; p.innerHTML=''; };
+  $('.dclose',p).onclick=function(){
+    LETZTER_DIFF=null; DIFF_OFFEN={}; p.hidden=true; p.innerHTML=''; };
+  var nb=$('.dnames',p);
+  if(nb) nb.onclick=function(){
+    state.ui.diffOhneNamen=!state.ui.diffOhneNamen; saveState(); renderDiff(); };
+  $$('.dmore',p).forEach(function(b){ b.onclick=function(){
+    var k=b.dataset.k; DIFF_OFFEN[k]=!DIFF_OFFEN[k]; renderDiff(); }; });
 }
 
 /* ═══════════════ Quellenliste ═══════════════ */
@@ -1823,6 +1923,8 @@ function renderQuellen(){
     h+='<li><span class="snm"><b>'+esc(sq.label||sq.title||sq.name)+'</b>'+
        (sq.name?' <span class="sdet">'+esc(sq.name)+'</span>':'')+
        '<br><span class="sdet">'+esc(det)+'</span></span>'+
+       '<button class="supd" data-q="'+esc(sq.id)+'" title="'+esc(t('src.updateTitle'))+'">'+
+         esc(t('src.update'))+'</button>'+
        (SOURCES.length>1?'<button class="sonly" data-q="'+esc(sq.id)+'">'+esc(t('src.only'))+'</button>':'')+
        '<button class="srm" data-q="'+esc(sq.id)+'">'+esc(t('plan.remove'))+'</button></li>';
   });
@@ -1830,6 +1932,8 @@ function renderQuellen(){
      '<button id="srcReplace" class="ghost">'+esc(t('src.replace'))+'</button></div>';
   panel.innerHTML=h;
   $$('.srm',panel).forEach(function(b){b.onclick=function(){quelleWeg(b.dataset.q);};});
+  $$('.supd',panel).forEach(function(b){b.onclick=function(){
+    QUELLE_ZUM_AKTUALISIEREN=b.dataset.q; $('#updInput').click(); };});
   $$('.sonly',panel).forEach(function(b){b.onclick=function(){
     SOURCES=SOURCES.filter(function(sq){return sq.id===b.dataset.q;});
     quellenSichern(); rebuildCatalog(); buildApp(CAT);};});
@@ -2800,6 +2904,19 @@ $('#srcBtn').onclick=function(){
   var p=$('#srcPanel'); p.hidden=!p.hidden; renderQuellen();
   if(!p.hidden) syncKopfhoehen();};
 $('#addInput').onchange=function(){ handleFiles(this.files,false); this.value=''; };
+var QUELLE_ZUM_AKTUALISIEREN=null;
+$('#updInput').onchange=function(){
+  var f=this.files[0], id=QUELLE_ZUM_AKTUALISIEREN;
+  this.value=''; QUELLE_ZUM_AKTUALISIEREN=null;
+  if(!f||!id) return;
+  var fr=new FileReader();
+  fr.onload=function(){
+    try{ quelleAktualisieren(id, String(fr.result), f.name, f.lastModified||0); }
+    catch(e){ alert((e&&e.message)||String(e)); }
+  };
+  fr.onerror=function(){ alert(t('err.unreadable')); };
+  fr.readAsText(f,'utf-8');
+};
 
 var plan=$('#plan');
 $('#planBtn').onclick=function(){plan.classList.add('open');drawPlan();};
