@@ -13,6 +13,7 @@
  --evtl:#9a6a12;--evtl-soft:#fbf1dd;
  --warn:#b3261e;--warn-soft:#fdeae8;
  --bg:#fff;--side:290px;--bar:54px;
+ --aus:cubic-bezier(.22,.61,.36,1);   /* sanftes Ausrollen fuer Aufklapp-Bewegungen */
 }
 *{box-sizing:border-box;}
 html{font:15px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
@@ -114,8 +115,12 @@ main .card.help{margin-top:3rem;background:var(--soft);}
 .bar button:hover{background:var(--soft);}
 .bar button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
 .bar .hits{color:var(--muted);font-size:12px;white-space:nowrap;}
-.langbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:.38rem .65rem;
- font-size:13px;cursor:pointer;white-space:nowrap;}
+.langbtn{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line);
+ background:#fff;border-radius:8px;padding:.3rem .55rem;font-size:12.5px;cursor:pointer;
+ white-space:nowrap;}
+.flag{width:19px;height:13px;display:block;flex:none;border:1px solid rgba(0,0,0,.2);
+ border-radius:2px;}
+.flagtxt{font-weight:600;letter-spacing:.02em;}
 .langbtn:hover{background:var(--soft);}
 .start .langbtn{float:right;margin-left:1rem;}
 .bar .spacer{flex:1;}
@@ -127,6 +132,40 @@ main .card.help{margin-top:3rem;background:var(--soft);}
 .filters{position:sticky;top:var(--barh,var(--bar));z-index:35;display:flex;gap:.4rem;align-items:center;
  flex-wrap:wrap;padding:.4rem .8rem;background:var(--soft);border-bottom:1px solid var(--line);font-size:13px;}
 .filters .lbl{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin-right:.1rem;}
+.filters .flbl{display:inline-flex;align-items:center;color:var(--muted);flex:none;}
+.ik{width:15px;height:15px;display:block;flex:none;}
+.ikonchip{display:inline-flex;align-items:center;gap:.3rem;}
+.ikonchip .i-eye{display:none;}
+.ikonchip.on .i-eye{display:block;}
+.ikonchip.on .i-eyeoff{display:none;}
+.ikonchip .hcnt{font-variant-numeric:tabular-nums;min-width:2ch;text-align:center;
+ display:inline-block;}
+/* Ohne Zahl bleibt der Knopf schmal — kein Leerraum neben dem Auge.
+   Die feste Ziffernbreite verhindert aber das Springen zwischen 1 und 99. */
+.ikonchip .hcnt:empty{display:none;}
+
+/* Einmaliger Wegweiser zum Auge */
+@keyframes augenpuls{
+  0%  {box-shadow:0 0 0 0 rgba(122,31,43,.5);}
+  70% {box-shadow:0 0 0 13px rgba(122,31,43,0);}
+  100%{box-shadow:0 0 0 0 rgba(122,31,43,0);}
+}
+#fHidden.puls{animation:augenpuls 1.15s ease-out 3;
+ border-color:var(--accent);color:var(--accent);}
+.augentipp{position:fixed;z-index:80;background:var(--accent);color:#fff;
+ border-radius:8px;padding:.45rem .7rem;font-size:12.5px;max-width:15rem;
+ box-shadow:0 6px 18px rgba(0,0,0,.22);opacity:0;transform:translateY(-4px);
+ animation:tippAuf .25s ease-out forwards;pointer-events:none;}
+@keyframes tippAuf{to{opacity:1;transform:none;}}
+.augentipp.weg{animation:tippZu .5s ease-in forwards;}
+@keyframes tippZu{to{opacity:0;transform:translateY(-4px);}}
+@media (prefers-reduced-motion: reduce){
+  #fHidden.puls{animation:none;outline:2px solid var(--accent);outline-offset:2px;}
+  .augentipp{animation:none;opacity:1;transform:none;}
+  .bar input[type=search],.bar .brand,.bar #tocBtn,.bar #planBtn,.bar .spacer,
+  #searchBtn .ik,.sheet,.sheet-box,.eigenform,.desc,.desc-toggle .ik,
+  .krume-vor,.krume-hier,.standwrap{transition:none;}
+}
 .chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:.2rem .7rem;
  cursor:pointer;font-size:12.5px;color:var(--fg);}
 .chip.on{background:var(--accent);color:#fff;border-color:var(--accent);}
@@ -186,18 +225,84 @@ main .card.help{margin-top:3rem;background:var(--soft);}
 .toc a .c{color:var(--muted);font-weight:400;font-size:11px;}
 .toc a.sec-hidden{opacity:.45;text-decoration:line-through;}
 main{flex:1;min-width:0;max-width:920px;margin:0 auto;padding:1.3rem 1.6rem 6rem;}
+/* Höhe 0: der Streifen liegt über dem Inhalt, statt ihn zu verschieben */
+.krume{position:sticky;top:calc(var(--barh,var(--bar)) + var(--filterh,38px));
+ height:0;overflow:visible;z-index:34;}
+.krume-in{position:absolute;left:0;right:0;top:4px;display:flex;align-items:center;gap:.15rem;
+ border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.94);
+ backdrop-filter:blur(6px);box-shadow:0 2px 10px rgba(0,0,0,.07);
+ padding:.18rem .3rem;font-size:12px;color:var(--muted);
+ opacity:0;transform:translateY(-7px);pointer-events:none;
+ transition:opacity .2s ease,transform .26s var(--aus);}
+.krume.an .krume-in{opacity:1;transform:none;pointer-events:auto;}
+.krume-nav{flex:none;display:inline-flex;align-items:center;justify-content:center;border:none;
+ background:none;color:var(--muted);cursor:pointer;padding:.26rem;border-radius:6px;
+ position:relative;z-index:1;}
+.krume-nav .ik{width:14px;height:14px;}
+.krume-nav:hover{background:var(--soft);color:var(--accent);}
+.krume-nav[disabled]{opacity:.28;cursor:default;background:none;color:var(--muted);}
+.krume-txt{flex:1;min-width:0;display:flex;align-items:center;white-space:nowrap;}
+/* Umgekehrte Richtung: wird es eng, fallen die äußersten Stufen links weg,
+   die nächstgelegene bleibt stehen. */
+.krume-vor{flex:0 1 auto;min-width:0;display:flex;flex-direction:row-reverse;
+ align-items:center;overflow-x:auto;overflow-y:hidden;
+ scrollbar-width:none;-ms-overflow-style:none;
+ overscroll-behavior-x:contain;touch-action:pan-x pan-y;}
+.krume-vor::-webkit-scrollbar{display:none;}
+.krume-vor.ml{-webkit-mask-image:linear-gradient(to right,transparent 0,#000 18px);
+ mask-image:linear-gradient(to right,transparent 0,#000 18px);}
+.krume-vor.mr{-webkit-mask-image:linear-gradient(to left,transparent 0,#000 18px);
+ mask-image:linear-gradient(to left,transparent 0,#000 18px);}
+.krume-vor.ml.mr{-webkit-mask-image:linear-gradient(to right,transparent 0,#000 18px,
+ #000 calc(100% - 18px),transparent 100%);
+ mask-image:linear-gradient(to right,transparent 0,#000 18px,
+ #000 calc(100% - 18px),transparent 100%);}
+.krume-stufe{flex:none;display:inline-flex;align-items:center;border:none;background:none;
+ font:inherit;color:var(--muted);cursor:pointer;padding:.16rem .2rem;border-radius:5px;
+ white-space:nowrap;}
+.krume-stufe:hover{background:var(--soft);color:var(--accent);}
+.krume-stufe .tr{color:var(--line);padding-left:.34rem;}
+.krume-hier{flex:0 0 auto;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+ display:block;border:none;background:none;font:inherit;cursor:pointer;
+ color:var(--fg);font-weight:600;padding:.16rem .22rem;border-radius:5px;text-align:left;}
+.krume-hier:hover{background:var(--soft);color:var(--accent);}
+.krume-vor,.krume-hier{transition:opacity .18s ease,transform .22s var(--aus);}
+.krume-txt .neu{opacity:.25;transform:translateY(3px);}
+.krume-in:hover{border-color:var(--accent);}
+@media print{.krume{display:none;}}
+/* Standort in der Seitenleiste */
+.toc a{transition:background-color .18s ease,color .18s ease,box-shadow .18s ease;}
+.toc a.imPfad{background:#fff;}
+.toc a.hier{background:var(--accent-soft);color:var(--accent);font-weight:600;
+ box-shadow:inset 2.5px 0 0 var(--accent);}
+.toc a.hier .c{color:var(--accent);}
 .doc-h1{font-size:1.65rem;margin:.2rem 0 .1rem;}
 .doc-sub{color:var(--muted);margin-bottom:1.3rem;font-size:.94rem;}
 .stand{font-size:.88rem;}
-.stand.alt{color:#7a5310;background:var(--evtl-soft);border:1px solid var(--evtl);
- border-radius:6px;padding:.15rem .45rem;display:inline-block;margin-top:.25rem;}
-.stand.hinweis{color:#55555d;background:var(--soft);border:1px solid var(--line);
- border-radius:6px;padding:.15rem .45rem;display:inline-block;margin-top:.25rem;}
+/* Der Hinweis ist eine eigene Karte, kein Satz mit eingeschobenem Knopf */
+.standwrap{display:grid;grid-template-rows:1fr;margin:0 0 1.1rem;
+ transition:grid-template-rows .26s var(--aus),opacity .2s ease,margin .26s var(--aus);}
+.standwrap>div{min-height:0;overflow:hidden;}
+.standwrap.weg{grid-template-rows:0fr;opacity:0;margin-bottom:0;}
+.standbox{display:flex;gap:.65rem;align-items:flex-start;max-width:46rem;
+ padding:.65rem .7rem;border:1px solid var(--line);background:var(--soft);
+ border-radius:10px;font-size:.88rem;color:#55555d;}
+.standbox.alt{border-color:var(--evtl);background:var(--evtl-soft);color:#7a5310;}
+.standbox>.ik{width:18px;height:18px;flex:none;margin-top:.08rem;}
+.standbox-txt{flex:1;min-width:0;}
+.standbox-txt b{display:block;font-weight:600;margin-bottom:.12rem;}
+.standbox-txt p{margin:0 0 .55rem;line-height:1.45;}
+.standbox-akt{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;}
 .standupd{border:1px solid var(--accent);background:var(--accent);color:#fff;
- border-radius:7px;padding:.18rem .6rem;font-size:12px;font-weight:600;cursor:pointer;
- margin:0 .35rem;white-space:nowrap;}
+ border-radius:7px;padding:.28rem .7rem;font-size:12.5px;font-weight:600;cursor:pointer;
+ white-space:nowrap;}
 .standupd:hover{filter:brightness(1.1);}
-.standwo{font-size:.9em;opacity:.85;}
+.standwo{font-size:.9em;opacity:.8;}
+.standzu{flex:none;border:none;background:none;color:inherit;opacity:.5;cursor:pointer;
+ padding:.25rem;border-radius:6px;line-height:0;}
+.standzu:hover{opacity:1;background:rgba(0,0,0,.07);}
+.standzu .ik{width:15px;height:15px;display:block;}
+@media print{.standwrap{display:none;}}
 
 /* ============ Sections ============ */
 .sec{margin:.2rem 0;}
@@ -237,8 +342,13 @@ body.show-hidden article.kurs.st-raus{display:block;opacity:.45;background:var(-
 .kurs-titel .nr{display:inline-block;font-weight:400;color:#fff;background:var(--accent);border-radius:4px;
  padding:0 .4rem;font-size:.75rem;vertical-align:.09rem;margin-right:.15rem;}
 .seg{flex:none;display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:#fff;}
-.seg button{border:none;background:none;padding:.25rem .5rem;font-size:12px;cursor:pointer;
- border-right:1px solid var(--line);color:var(--muted);white-space:nowrap;}
+.seg button{border:none;background:none;padding:.3rem .55rem;font-size:12px;cursor:pointer;
+ border-right:1px solid var(--line);color:var(--muted);white-space:nowrap;
+ display:inline-flex;align-items:center;}
+.seg button .ik{width:16px;height:16px;}
+.seg button[data-st="fest"]{color:var(--fest);}
+.seg button[data-st="vielleicht"]{color:var(--evtl);}
+.seg button[data-st="raus"]{color:var(--muted);}
 .seg button:last-child{border-right:none;}
 .seg button:hover{background:var(--soft);}
 .seg button.on[data-st="fest"]{background:var(--fest);color:#fff;}
@@ -260,11 +370,22 @@ ul.termine li{margin:.1rem 0;}
  color:var(--muted);margin-bottom:.1rem;}
 .block p{margin:.3rem 0;}
 .block ul,.block ol{margin:.3rem 0;padding-left:1.3rem;}
-body.compact article.kurs:not(.showdesc) .block, body.compact .rubrik-info{display:none;}
-.desc-toggle{display:none;border:1px solid var(--line);background:#fff;border-radius:6px;
- color:var(--muted);font-size:12px;cursor:pointer;padding:.15rem .5rem;margin:.3rem 0 0;}
-body.compact article.kurs.hasdesc .desc-toggle{display:inline-block;}
-.desc-toggle:hover{background:var(--soft);color:var(--fg);}
+body.compact .rubrik-info{display:none;}
+/* 0fr → 1fr fährt die Höhe weich auf, ohne sie vorher kennen zu müssen */
+.desc{display:grid;grid-template-rows:1fr;transition:grid-template-rows .24s var(--aus);}
+.desc>.desc-in{min-height:0;overflow:hidden;}
+body.compact article.kurs:not(.showdesc) .desc{grid-template-rows:0fr;}
+.desc-toggle{display:none;align-items:center;gap:.3rem;border:none;background:none;
+ color:var(--muted);font-size:12px;cursor:pointer;padding:.3rem .1rem .05rem;margin:0;}
+.desc-toggle .ik{width:14px;height:14px;flex:none;transition:transform .24s var(--aus);}
+body.compact article.kurs.showdesc .desc-toggle .ik{transform:rotate(180deg);}
+body.compact article.kurs.hasdesc .desc-toggle{display:inline-flex;}
+.desc-toggle:hover{color:var(--accent);background:none;}
+/* Die ganze Karte ist der Schalter — nur im Beschreibungstext nicht,
+   damit man dort in Ruhe lesen und markieren kann. */
+body.compact article.kurs.hasdesc{cursor:pointer;}
+body.compact article.kurs .desc,body.compact article.kurs .seg,
+body.compact article.kurs .note-wrap{cursor:auto;}
 .note-wrap{margin:.4rem 0 .1rem;}
 .note-wrap textarea{width:100%;border:1px dashed var(--line);border-radius:6px;padding:.35rem .5rem;
  font:inherit;font-size:.86rem;resize:vertical;min-height:2.1em;background:#fff;}
@@ -275,6 +396,46 @@ body.compact article.kurs.hasdesc .desc-toggle{display:inline-block;}
 mark{background:#ffe9a8;padding:0 .1em;}
 
 /* ============ Stundenplan ============ */
+/* Wiederverwendbarer Dialog */
+.sheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.4);display:flex;
+ align-items:center;justify-content:center;padding:1rem;}
+.sheet[hidden]{display:none;}
+/* Auf- und Zugleiten: 'auf' wird erst im Bild nach dem Einblenden gesetzt */
+.sheet{opacity:0;transition:opacity .2s ease;}
+.sheet.auf{opacity:1;}
+.sheet-box{opacity:0;transform:translateY(14px) scale(.97);
+ transition:opacity .2s ease,transform .26s var(--aus);}
+.sheet.auf .sheet-box{opacity:1;transform:none;}
+.sheet-box{background:#fff;border-radius:14px;width:min(26rem,100%);max-height:80vh;
+ display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.3);overflow:hidden;}
+.sheet-head{display:flex;align-items:center;gap:.6rem;padding:.8rem 1rem;
+ border-bottom:1px solid var(--line);}
+.sheet-head h3{margin:0;font-size:1.02rem;flex:1;}
+.sheet-x{border:none;background:none;cursor:pointer;color:var(--muted);padding:.25rem;
+ display:inline-flex;border-radius:7px;}
+.sheet-x:hover{background:var(--soft);color:var(--fg);}
+.sheet-x .ik{width:20px;height:20px;}
+.sheet-body{padding:.7rem 1rem 1rem;overflow:auto;}
+.sheet-opt{display:flex;align-items:center;gap:.7rem;width:100%;text-align:left;
+ border:1px solid var(--line);background:#fff;border-radius:10px;padding:.7rem .8rem;
+ margin:.4rem 0;cursor:pointer;font:inherit;font-size:.95rem;}
+.sheet-opt:hover{background:var(--soft);}
+.sheet-opt .ik{width:19px;height:19px;flex:none;color:var(--accent);}
+.sheet-opt small{display:block;color:var(--muted);font-size:.8rem;font-weight:400;}
+.sheet-opt b{font-weight:600;}
+.sheet-chip{display:flex;align-items:flex-start;gap:.6rem;padding:.55rem .6rem;border-radius:8px;
+ cursor:pointer;font-size:.95rem;}
+.sheet-chip:nth-child(odd){background:var(--softer);}
+.sheet-chip input{width:17px;height:17px;flex:none;margin-top:.12rem;accent-color:var(--accent);}
+.sheet-chip>span{min-width:0;}
+.sheet-chip small{display:block;color:var(--muted);font-size:.8rem;line-height:1.35;margin-top:.1rem;}
+.sheet-chip b{font-weight:600;}
+@media(max-width:880px){
+  .sheet{align-items:flex-end;padding:0;}
+  .sheet-box{width:100%;border-radius:14px 14px 0 0;max-height:72vh;
+   opacity:1;transform:translateY(100%);}   /* schmal: von unten herein */
+}
+
 .plan{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.35);display:none;}
 .plan.open{display:block;}
 .plan-inner{position:absolute;inset:2vh 2vw;background:#fff;border-radius:12px;display:flex;flex-direction:column;
@@ -285,6 +446,13 @@ mark{background:#ffe9a8;padding:0 .1em;}
 .plan-bar button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:.35rem .65rem;
  cursor:pointer;font-size:13px;}
 .plan-bar button:hover{background:var(--soft);}
+.ikonbtn{display:inline-flex;align-items:center;justify-content:center;padding:.35rem .5rem;}
+.plan-bar #tEvtl,.plan-bar #tBlock,.plan-bar #tDay{padding:.35rem .65rem;}
+#planView{display:none;}                        /* nur schmal gebraucht */
+#planView.eingeschraenkt{color:var(--evtl);border-color:var(--evtl);}
+#tEvtl{color:var(--evtl);}
+#tEvtl.on{background:var(--evtl);border-color:var(--evtl);color:#fff;}
+.ikonbtn .ik{width:16px;height:16px;}
 .plan-bar button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
 .plan-body{flex:1;overflow:auto;padding:1rem;}
 .scrollhint{display:none;color:var(--muted);font-size:12px;margin:0 0 .4rem;}
@@ -333,6 +501,9 @@ mark{background:#ffe9a8;padding:0 .1em;}
 .ef-colors{display:flex;gap:.25rem;}
 .ef-colors button{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;}
 .ef-colors button.on{border-color:var(--fg);}
+.eigenform{opacity:0;transform:translateY(10px);
+ transition:opacity .2s ease,transform .26s var(--aus);}
+.eigenform.auf{opacity:1;transform:none;}
 .eigenform .btn{padding:.35rem .8rem;font-size:13px;}
 .eigenform .lnk{border:none;background:none;cursor:pointer;font-size:13px;color:var(--muted);}
 .eigenform .lnk:hover{color:var(--fg);}
@@ -354,17 +525,43 @@ mark{background:#ffe9a8;padding:0 .1em;}
 .plan-list .rm{border:none;background:none;color:var(--warn);cursor:pointer;font-size:12px;}
 .plan-list .sw{border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:11.5px;padding:.1rem .4rem;}
 
-#tocBtn{display:none;font-size:16px;line-height:1;padding:.3rem .55rem;}
+#tocBtn{display:none;}
+.txtik{display:inline-flex;align-items:center;}
+.txtik .ik{width:16px;height:16px;flex:none;}
+.btxt{margin-left:.4rem;}
+.faltbtn .i-aus{display:none;}
+.faltbtn.alleszu .i-ein{display:none;}
+.faltbtn.alleszu .i-aus{display:block;}
+#tDay .i-woche{display:none;}
+#tDay.on .i-tag{display:none;}
+#tDay.on .i-woche{display:block;}
+/* Überschrift der Schublade: hier steht das Zeichen, nicht mehr in der Leiste */
+.toc-head{display:none;align-items:center;gap:.6rem;padding:.1rem .6rem .75rem;
+ border-bottom:1px solid var(--line);margin-bottom:.7rem;}
+.toc-head .brandicon{width:27px;height:27px;}
+.toc-head b{display:block;color:var(--accent);font-size:1.02rem;line-height:1.15;}
+.toc-head small{display:block;color:var(--muted);font-size:11.5px;line-height:1.3;}
+#searchBtn,#orteBtn{display:none;}
+.ikonbtn2{align-items:center;justify-content:center;padding:.35rem .5rem;line-height:0;}
+.ikonbtn2 .ik{width:17px;height:17px;}
+#searchBtn{position:relative;}
+#searchBtn .ik{transition:opacity .17s ease,transform .26s var(--aus);}
+#searchBtn .i-zu{position:absolute;top:50%;left:50%;margin:-8.5px 0 0 -8.5px;
+ opacity:0;transform:rotate(-80deg) scale(.5);}
+body.suche #searchBtn .i-lupe{opacity:0;transform:rotate(80deg) scale(.5);}
+body.suche #searchBtn .i-zu{opacity:1;transform:none;}
 .tocback{display:none;}
 .toctools{display:none;flex-wrap:wrap;gap:.3rem;padding:0 .5rem .7rem;
  border-bottom:1px solid var(--line);margin-bottom:.6rem;}
-.toctools button{border:1px solid var(--line);background:#fff;border-radius:7px;
- padding:.42rem .65rem;font-size:12.5px;cursor:pointer;}
+.toctools button{display:inline-flex;align-items:center;border:1px solid var(--line);
+ background:#fff;border-radius:7px;padding:.42rem .65rem;font-size:12.5px;cursor:pointer;}
+.toctools .ik{width:15px;height:15px;flex:none;}
+.toctools .btxt{display:inline;margin-left:.4rem;}
 .toctools button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
 
 @media(max-width:880px){
  /* Seitenleiste wird zur Schublade über dem Inhalt */
- #tocBtn{display:block;}
+ #tocBtn{display:inline-flex;}
  .toc{position:fixed;left:0;top:0;bottom:0;z-index:70;width:min(84vw,310px);height:auto;
   box-shadow:4px 0 24px rgba(0,0,0,.25);transform:translateX(-102%);
   transition:transform .18s ease;padding-top:1rem;}
@@ -377,33 +574,72 @@ mark{background:#ffe9a8;padding:0 .1em;}
  html{font-size:15.5px;}
  body{overflow-x:hidden;}
  .bar{gap:.35rem;padding:.35rem .5rem;}
- .bar input[type=search]{min-width:70px;flex:1 1 70px;max-width:none;}
- .bar .spacer{display:none;}            /* Suchfeld nimmt den Platz */
+ /* Suche steckt hinter dem Lupensymbol und klappt bei Bedarf auf */
+ #searchBtn{display:inline-flex;}
+ .bar input[type=search]{display:block;flex:0 1 0;min-width:0;max-width:none;
+  padding-left:0;padding-right:0;border-width:0;opacity:0;pointer-events:none;
+  margin-left:-.35rem;                    /* schluckt die Luecke, solange zu */
+  transition:flex-grow .3s var(--aus),padding .3s var(--aus),
+   border-width .3s var(--aus),margin-left .3s var(--aus),opacity .18s ease;}
+ body.suche .bar input[type=search]{flex-grow:1;padding-left:.8rem;padding-right:.8rem;
+  border-width:1px;opacity:1;pointer-events:auto;margin-left:0;}
+ /* Marke, Menue und Planknopf schrumpfen mit, statt einfach zu verschwinden */
+ .bar .brand,.bar #tocBtn,.bar #planBtn{overflow:hidden;
+  transition:flex-basis .3s var(--aus),width .3s var(--aus),padding .3s var(--aus),
+   border-width .3s var(--aus),margin .3s var(--aus),opacity .16s ease;}
+ body.suche .bar .brand,body.suche .bar #tocBtn,body.suche #planBtn{
+  flex:0 0 0;width:0;min-width:0;padding-left:0;padding-right:0;border-width:0;
+  margin:0 -.175rem;opacity:0;pointer-events:none;}
+ .bar .spacer{display:block;flex:1 1 0;margin:0 -.175rem;
+  transition:flex-grow .3s var(--aus);}
+ body.suche .bar .spacer{flex-grow:0;}
  .bar #langBtn{display:none;}           /* steckt in der Schublade */
  #planBtn{flex:none;}
  .bar .brandtxt{display:none;}   /* schmal: nur das Zeichen */
  .bar button{padding:.42rem .6rem;}
- /* Filter in eine seitlich schiebbare Zeile statt über mehrere Reihen */
- .filters{padding:.35rem .5rem;gap:.3rem;flex-wrap:nowrap;overflow-x:auto;
-  scrollbar-width:none;}
- .filters::-webkit-scrollbar{display:none;}
+
+ /* Filterzeile: alles sichtbar, kein seitliches Schieben mehr */
+ .filters{padding:.35rem .5rem;gap:.35rem;flex-wrap:nowrap;overflow:visible;}
  .filters>*{flex:none;}
- .filters .lbl,.filters .spacer,.filters #hiddenInfo{display:none;}
- .chip{padding:.3rem .7rem;}
+ .filters .lbl,.filters .spacer,.filters #hiddenInfo,.filters .flbl{display:none;}
+ .chiptxt{display:none;}                  /* Symbole statt Wörter */
+ #orteBtn{display:inline-flex;}
+ #orteChips{display:none;}                /* Standorte stecken im Dialog */
+ #sgSel{max-width:38vw;padding:.37rem 1.6rem .37rem .6rem;}
+ .filters .chip{padding:.3rem .5rem;}
  /* selten gebrauchte Knöpfe wandern in die Schublade */
- .bar #collapseAll,.bar #expandAll,.bar #compactBtn,.bar #printBtn,.bar #newFileBtn{display:none;}
+ .bar #foldBtn,.bar #printBtn,.bar #newFileBtn{display:none;}
+ .bar .brand{display:none;}        /* das Zeichen steht jetzt in der Schublade */
+ .bar .btxt,.plan-bar .btxt{display:none;}   /* schmal: nur die Zeichen */
+ .bar .txtik{padding:.42rem .55rem;}
+ .toc-head{display:flex;}
  .bar .hits{font-size:11.5px;}
  .toctools{display:flex;}
 
  article.kurs{padding:.65rem .7rem;}
+ .desc-toggle{padding:.45rem .1rem .1rem;}   /* Fläche gibt die Karte her */
+ .krume-nav{padding:.42rem;}                /* größere Tippfläche */
+ .standzu{padding:.45rem;}                  /* dito */
+ .krume-in{padding:.1rem .25rem;}
  .kurs-top{flex-wrap:wrap;}
  .kurs-titel{flex:1 1 100%;}
  .seg{margin-left:auto;}
  .seg button{padding:.35rem .6rem;}       /* größere Tippflächen */
 
  .plan-inner{inset:0;border-radius:0;}
- .plan-bar{padding:.5rem .6rem;gap:.35rem;}
- .plan-bar h2{font-size:1rem;width:100%;}
+ .plan-bar{padding:.5rem 3rem .5rem .6rem;gap:.35rem;}
+ .plan-bar h2{display:none;}   /* Titel entbehrlich: X oben rechts genügt */
+ /* schmal: die beiden Schalter stecken im Ansichts-Dialog, dort mit Erklärung */
+ .plan-bar #tEvtl,.plan-bar #tBlock{display:none;}
+ .plan-bar #planView{display:inline-flex;}
+ .plan-bar{flex-wrap:nowrap;justify-content:flex-start;}
+ .planx{position:absolute;top:.45rem;right:.5rem;}   /* X wirklich oben rechts */
+ .plan-bar .spacer{display:none;}
+ /* Formular für eigene Termine kommt von unten statt die Leiste zu verschieben */
+ .eigenform{position:absolute;left:0;right:0;bottom:0;z-index:5;
+  border-top:1px solid var(--line);border-bottom:none;
+  box-shadow:0 -8px 24px rgba(0,0,0,.18);border-radius:12px 12px 0 0;
+  max-height:70vh;overflow:auto;}
  .plan-body{padding:.6rem;}
  .grid{min-width:560px;}
  .sums{gap:.35rem;} .sum{padding:.3rem .5rem;font-size:12px;}
@@ -475,7 +711,7 @@ mark{background:#ffe9a8;padding:0 .1em;}
 <!-- ══════════════ APP ══════════════ -->
 <div id="screenApp" hidden>
   <div class="bar">
-    <button id="tocBtn" data-i18n-title="bar.tocTitle">☰</button>
+    <button id="tocBtn" class="ikonbtn2" data-i18n-title="bar.tocTitle"><svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     <span class="brand">
       <svg class="brandicon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
         <rect width="32" height="32" rx="7" fill="#7a1f2b"/>
@@ -485,30 +721,46 @@ mark{background:#ffe9a8;padding:0 .1em;}
       </svg>
       <span class="brandtxt">HfMT</span>
     </span>
+    <button id="searchBtn" class="ikonbtn2" aria-expanded="false" data-i18n-title="bar.search">
+      <svg class="ik i-lupe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg class="ik i-zu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
     <input id="q" type="search" data-i18n-ph="bar.search">
     <span id="hits" class="hits"></span>
-    <button id="collapseAll" data-i18n="bar.collapse" data-i18n-title="bar.collapseTitle"></button>
-    <button id="expandAll" data-i18n="bar.expand" data-i18n-title="bar.expandTitle"></button>
-    <button id="compactBtn" data-i18n="bar.compact" data-i18n-title="bar.compactTitle"></button>
+    <!-- ein Knopf für beides: ist alles zu, klappt er alles auf -->
+    <button id="foldBtn" class="txtik faltbtn"><svg class="ik i-ein" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 16 12 10 18 16"/><polyline points="6 10 12 4 18 10"/></svg><svg class="ik i-aus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 8 12 14 18 8"/><polyline points="6 14 12 20 18 14"/></svg><span class="btxt" id="foldLbl"></span></button>
+    <button id="compactBtn" class="txtik" data-i18n-title="bar.compactTitle"><svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><line x1="6.8" y1="10" x2="17.2" y2="10"/></svg><span class="btxt" data-i18n="bar.compact"></span></button>
     <span class="spacer"></span>
     <button id="planBtn"><span id="planLbl"></span> <span class="cnt" id="planCnt">0</span></button>
-    <button id="printBtn" data-i18n="bar.print"></button>
-    <button id="newFileBtn" data-i18n="bar.newfile" data-i18n-title="bar.newfileTitle"></button>
+    <button id="printBtn" class="txtik" data-i18n-title="bar.printTitle"><svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg><span class="btxt" data-i18n="bar.print"></span></button>
+    <button id="newFileBtn" class="txtik" data-i18n-title="bar.newfileTitle"><svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><polyline points="9.5 14.5 12 12 12 17"/><path d="M12 12a3 3 0 1 1 0 5"/></svg><span class="btxt" data-i18n="bar.newfile"></span></button>
     <button id="langBtn" class="langbtn"></button>
   </div>
 
   <div class="filters">
-    <span class="lbl" data-i18n="f.show"></span>
-    <button class="chip" id="fPicked" data-i18n="f.onlyPicked"></button>
-    <button class="chip" id="fHidden" data-i18n="f.showHidden"></button>
-    <span id="hiddenInfo" class="mini"></span>
-    <button class="chip" id="srcBtn" hidden></button>
+    <button class="chip ikonchip" id="fPicked" data-i18n-title="f.onlyPicked">
+      <svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.6 22 9.6 17 14.5 18.2 21.4 12 18.1 5.8 21.4 7 14.5 2 9.6 8.9 8.6 12 2"/></svg>
+      <span class="chiptxt" data-i18n="f.onlyPicked"></span>
+    </button>
+    <button class="chip ikonchip" id="fHidden" data-i18n-title="f.showHidden">
+      <svg class="ik i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+      <svg class="ik i-eyeoff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
+      <span class="hcnt" id="hiddenCount"></span>
+    </button>
+    <button class="chip ikonchip" id="srcBtn" hidden>
+      <svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      <span class="chiptxt" id="srcTxt"></span>
+    </button>
     <input type="file" id="addInput" accept=".xml,text/xml,application/xml" multiple hidden>
     <input type="file" id="updInput" accept=".xml,text/xml,application/xml" hidden>
     <span class="spacer" style="flex:1"></span>
-    <span class="lbl" id="sgLbl" hidden data-i18n="f.area"></span>
+    <span class="flbl" id="sgLbl" hidden data-i18n-title="f.area"><svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span>
     <select id="sgSel" hidden></select>
-    <span class="lbl" id="orteLbl" hidden data-i18n="f.location"></span>
+    <button class="chip ikonchip" id="orteBtn" hidden data-i18n-title="f.location">
+      <svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span class="hcnt" id="orteCount"></span>
+    </button>
+    <span class="flbl" id="orteLbl" hidden data-i18n-title="f.location"><svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
     <span id="orteChips"></span>
   </div>
 
@@ -518,12 +770,34 @@ mark{background:#ffe9a8;padding:0 .1em;}
     <div class="tocback" id="tocBack" hidden></div>
     <nav class="toc" id="toc"><h2>Inhalt</h2></nav>
     <main>
+      <!-- Schwebt über dem Inhalt (Höhe 0), damit beim Einblenden nichts verrutscht -->
+      <div class="krume" id="krume">
+        <div class="krume-in">
+          <div class="krume-txt" id="krumeTxt"></div>
+          <button class="krume-nav" id="krumeZur" type="button"><svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14 5 7 12 14 19"/></svg></button>
+          <button class="krume-nav" id="krumeVor" type="button"><svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="10 5 17 12 10 19"/></svg></button>
+        </div>
+      </div>
       <h1 class="doc-h1" id="docTitle"></h1>
       <p class="doc-sub" id="docSub"></p>
+      <div id="standBox"></div>
       <div class="diffpanel" id="diffPanel" hidden></div>
       <div id="catalog"></div>
       <div class="card help" id="helpApp"></div>
     </main>
+  </div>
+</div>
+
+<!-- ══════════════ DIALOG ══════════════ -->
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-box" role="dialog" aria-modal="true">
+    <div class="sheet-head">
+      <h3 id="sheetTitle"></h3>
+      <button class="sheet-x" id="sheetClose" aria-label="×">
+        <svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
   </div>
 </div>
 
@@ -532,16 +806,26 @@ mark{background:#ffe9a8;padding:0 .1em;}
   <div class="plan-inner">
     <div class="plan-bar">
       <h2 data-i18n="plan.title"></h2>
-      <button id="tEvtl" class="on" data-i18n="plan.evtl" data-i18n-title="plan.evtlTitle"></button>
-      <button id="tBlock" class="on" data-i18n="plan.block" data-i18n-title="plan.blockTitle"></button>
-      <button id="tDay" data-i18n="plan.day" data-i18n-title="plan.dayTitle"></button>
-      <button id="eigenAdd" data-i18n="plan.addOwn" data-i18n-title="plan.addOwnTitle"></button>
+      <button id="tEvtl" class="on ikonbtn evtlbtn" data-i18n-title="plan.evtlTitle">
+        <svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.3 9.4a2.8 2.8 0 0 1 5.4.9c0 1.9-2.7 2.5-2.7 2.5"/><line x1="12" y1="16.6" x2="12.01" y2="16.6"/></svg><span class="btxt" data-i18n="plan.evtl"></span></button>
+      <!-- gepunkteter Kasten = genau die gepunkteten Eintraege im Raster -->
+      <button id="tBlock" class="on ikonbtn" data-i18n-title="plan.blockTitle">
+        <svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="3" width="15" height="18" rx="2.5" stroke-dasharray="3 2.6"/></svg><span class="btxt" data-i18n="plan.block"></span></button>
+      <button id="planView" class="ikonbtn" data-i18n-title="plan.viewTitle">
+        <svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></button>
+      <button id="tDay" class="ikonbtn" data-i18n-title="plan.dayTitle"><svg class="ik i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="3" width="8" height="18" rx="2"/></svg><svg class="ik i-woche" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="8.7" y1="3" x2="8.7" y2="21"/><line x1="15.3" y1="3" x2="15.3" y2="21"/></svg><span class="btxt" id="tDayLbl"></span></button>
+      <button id="eigenAdd" class="ikonbtn" data-i18n-title="plan.addOwnTitle">
+        <svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
       <span class="spacer"></span>
-      <button id="planPrint" data-i18n="plan.print"></button>
-      <button id="planIcs" data-i18n="plan.ics"></button>
-      <button id="planExport" data-i18n="plan.save"></button>
-      <button id="planImport" data-i18n="plan.load"></button>
-      <button id="planClose" data-i18n="plan.close"></button>
+      <button id="planDl" class="ikonbtn" data-i18n-title="plan.download">
+        <svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+      <button id="planImport" class="ikonbtn" data-i18n-title="plan.load">
+        <svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></button>
+      <button id="planClose" class="ikonbtn planx" data-i18n-title="plan.close">
+        <svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button id="planPrint" hidden></button>
+      <button id="planIcs" hidden></button>
+      <button id="planExport" hidden></button>
       <input type="file" id="importInput" accept=".json,application/json" hidden>
     </div>
     <div class="eigenform" id="eigenForm" hidden>
@@ -613,6 +897,7 @@ var WECHSEL_MIN = 60;
    Die erste Stufe ist ein beiläufiger Hinweis, die zweite eine Warnung. */
 var STAND_HINWEIS_TAGE = 7;
 var STAND_WARNUNG_TAGE = 60;
+var STAND_RUHE_TAGE    = 7;    /* so lange bleibt der Hinweis nach dem Wegklicken weg */
 
 var KONTAKT_MAIL = "karl.baylan@stud.hfmt-koeln.de";
 var KONTAKT_NAME = "Karl Baylan";
@@ -664,13 +949,14 @@ de:{
  'bar.collapse':'Einklappen','bar.collapseTitle':'Alle Rubriken zuklappen',
  'bar.expand':'Ausklappen','bar.expandTitle':'Alle Rubriken aufklappen',
  'bar.compact':'Kompakt','bar.compactTitle':'Beschreibungstexte ausblenden',
- 'bar.plan':'Stundenplan','bar.print':'Drucken',
+ 'bar.plan':'Stundenplan','bar.print':'Drucken','bar.printTitle':'Verzeichnis ausdrucken oder als PDF sichern',
  'bar.newfile':'Andere Datei','bar.newfileTitle':'Anderes Vorlesungsverzeichnis laden',
  'bar.hits':'{0} von {1}',
 
  'f.show':'Anzeigen','f.onlyPicked':'Nur meine Auswahl','f.showHidden':'Ausgeblendete zeigen',
  'f.area':'Bereich','f.location':'Standort','f.allAreas':'Alle ({0})','f.noLocation':'ohne Angabe',
  'f.hidden':'ausgeblendet: {0}',
+ 'f.hiddenHint':'Ausgeblendetes findest du hier wieder',
  'f.hiddenSec':'{0} Rubrik','f.hiddenSecPl':'{0} Rubriken',
  'f.hiddenCourse':'{0} Veranstaltung','f.hiddenCoursePl':'{0} Veranstaltungen',
 
@@ -701,7 +987,10 @@ de:{
  'diff.f.name':'Titel','diff.f.typ':'Art','diff.f.pers':'Leitung',
  'diff.f.sws':'SWS','diff.f.ects':'ECTS','diff.f.termine':'Termine',
  'doc.standOldest':'ältester Stand von {0} Dateien: {1}',
- 'toc.title':'Inhalt',
+ 'toc.title':'Inhalt','krume.title':'Zum Anfang dieses Bereichs springen',
+ 'krume.prev':'Zurück zu: {0}','krume.next':'Weiter zu: {0}',
+ 'krume.prevNone':'Kein Bereich davor','krume.nextNone':'Kein Bereich danach',
+ 'krume.jump':'Zu: {0}',
  'sec.hide':'ausblenden','sec.show':'einblenden','sec.hideTitle':'Diese Rubrik ausblenden',
  'sec.untitled':'Ohne Titel',
 
@@ -720,7 +1009,7 @@ de:{
  'card.alsoFileFrag':'{0} weiterer Datei','card.alsoFileFragPl':'{0} weiteren Dateien',
  'card.alsoSecFrag':'{0} weiterer Rubrik','card.alsoSecFragPl':'{0} weiteren Rubriken',
  'card.clash':'⚠ Überschneidet sich mit: {0}','card.clashMore':' und {0} weiteren',
- 'card.desc':'▾ Beschreibung','card.descHide':'▴ Beschreibung ausblenden',
+ 'card.desc':'Beschreibung','card.descHide':'Beschreibung ausblenden',
  'card.note':'✎ Notiz','card.noteAdd':'✎ Notiz hinzufügen',
  'card.notePh':'Eigene Notiz (z. B. Anmeldung bis …)',
 
@@ -730,19 +1019,33 @@ de:{
  'doc.courses':'{0} Veranstaltungen','doc.timed':'{0} mit festem Wochentermin',
  'doc.stand':'Stand der Datei: {0}','doc.standToday':' (heute)',
  'doc.standDay':' (vor {0} Tag)','doc.standDays':' (vor {0} Tagen)',
- 'doc.standSoon':' — kurz vor und zu Beginn des Semesters ändern sich Zeiten und Räume noch häufig, und es kommen Veranstaltungen dazu. Lade bei Gelegenheit einen frischen Export: die Seite zeigt dir dann, was sich geändert hat.',
+ 'doc.standSoonT':'Verzeichnis könnte veraltet sein ({0})',
+ 'doc.standAge1':'1 Tag','doc.standAge':'{0} Tage',
+ 'doc.standSoon':'Kurz vor und zu Beginn des Semesters ändern sich Zeiten und Räume noch häufig, und es kommen Veranstaltungen dazu. Lade bei Gelegenheit einen frischen Export — die Seite zeigt dir dann, was sich geändert hat.',
  'doc.standUpd':'Jetzt aktualisieren',
- 'doc.standWo':' Geht auch jederzeit unter „Verzeichnisse → aktualisieren".',
- 'doc.standOld':' — Räume und Zeiten ändern sich im Semester. Lade dir am besten einen frischen Export aus dem Portal; die Seite zeigt dir anschließend, was neu oder geändert ist.',
+ 'doc.standWo':'Geht auch jederzeit unter „Verzeichnisse → aktualisieren".',
+ 'doc.standOldT':'Verzeichnis ist veraltet ({0})',
+ 'doc.standOld':'Räume und Zeiten ändern sich im Semester. Lade dir am besten einen frischen Export aus dem Portal; die Seite zeigt dir anschließend, was neu oder geändert ist.',
+ 'doc.standHide':'Hinweis für eine Woche ausblenden',
 
  'plan.title':'Stundenplan',
- 'plan.evtl':'Vielleicht','plan.evtlTitle':'Vielleicht-Veranstaltungen im Raster zeigen',
- 'plan.block':'Block/Einzel','plan.blockTitle':'Block- und Einzeltermine im Raster zeigen',
- 'plan.day':'Tag','plan.dayTitle':'Zwischen Wochen- und Tagesansicht wechseln',
+ 'plan.evtl':'Vielleicht','plan.evtlTitle':'Veranstaltungen, die du mit ? markiert hast, im Raster zeigen',
+ 'plan.evtlSub':'Veranstaltungen, die du mit ? markiert hast',
+ 'plan.block':'Nicht wöchentlich',
+ 'plan.blockTitle':'Block- und Einzeltermine im Raster zeigen — sie stehen dort gestrichelt',
+ 'plan.blockSub':'Block- und Einzeltermine, also alles, was nicht jede Woche stattfindet. Sie stehen gestrichelt im Raster.',
+ 'plan.viewTitle':'Was im Raster steht',
+ 'plan.viewLimited':'Es ist gerade etwas ausgeblendet — hier tippen zum Ändern.',
+ 'plan.day':'Tag','plan.week':'Woche','plan.dayTitle':'Auf einen einzelnen Tag umschalten',
+ 'plan.weekTitle':'Zurück zur ganzen Woche',
  'plan.addOwn':'+ Eigener Termin','plan.addOwnTitle':'Eigenen Termin eintragen (Hauptfach, Üben, Sport …)',
  'plan.print':'Drucken / PDF','plan.ics':'Kalender (.ics)','plan.save':'Sichern','plan.load':'Laden',
+ 'plan.download':'Exportieren','plan.dlTitle':'Stundenplan exportieren',
+ 'plan.printSub':'Wochenraster und Liste ausdrucken oder als PDF sichern',
+ 'plan.icsSub':'Termine in deine Kalender-App übernehmen',
+ 'plan.saveSub':'Auswahl als Datei sichern, um sie auf ein anderes Gerät mitzunehmen',
  'plan.close':'Schließen',
- 'plan.empty':'Noch nichts ausgewählt. Markiere im Verzeichnis Veranstaltungen mit <b>Fest</b> oder <b>Evtl.</b> — sie erscheinen dann hier im Raster. Eigene Termine wie Hauptfach, Üben oder Sport trägst du oben über <b>+ Eigener Termin</b> ein.',
+ 'plan.empty':'Noch nichts ausgewählt. Markiere Veranstaltungen im Verzeichnis mit dem grünen <b>Haken</b> (fest) oder dem gelben <b>Fragezeichen</b> (vielleicht) — sie erscheinen dann hier im Raster. Eigene Termine wie Hauptfach, Üben oder Sport trägst du oben über <b>+ Eigener Termin</b> ein.',
  'plan.sumFest':'fest eingeplant','plan.sumEvtl':'vielleicht',
  'plan.sumSws':'SWS','plan.sumEcts':'ECTS*','plan.sumEctsNo':' · {0}× ohne Zahl',
  'plan.conflict':'⚠ {0} echte Überschneidung zwischen fest eingeplanten Terminen (rot markiert).',
@@ -782,7 +1085,7 @@ de:{
  'help.q2':'Fragen zu einer bestimmten Veranstaltung?',
  'help.a2':'Direkt an die Lehrenden. Wo eine Anmelde-Adresse hinterlegt ist, steht sie als Knopf ✉ auf der jeweiligen Kurskarte.',
  'help.q3':'Bleibt mein Stundenplan gespeichert?',
- 'help.a3':'Ja — im Browser, auf diesem Gerät. Du kannst die Seite einfach schließen und später weitermachen. Auf einem anderen Gerät oder in einem anderen Browser fängst du allerdings neu an: dafür im Stundenplan auf <b>Sichern</b>, die Datei mitnehmen und dort auf <b>Laden</b>.',
+ 'help.a3':'Ja — im Browser, auf diesem Gerät. Du kannst die Seite einfach schließen und später weitermachen. Auf einem anderen Gerät oder in einem anderen Browser fängst du allerdings neu an: dafür im Stundenplan auf <b>↓</b> (sichern), die Datei mitnehmen und dort auf <b>↑</b> (laden).',
  'help.q4':'Etwas an dieser Seite funktioniert nicht?',
  'help.mail':'Schreib mir eine Mail: ','help.ask':'Wende dich an {0}',
  'help.askNone':'Wende dich an die Person, von der du diese Datei bekommen hast',
@@ -837,13 +1140,14 @@ en:{
  'bar.collapse':'Collapse','bar.collapseTitle':'Collapse all sections',
  'bar.expand':'Expand','bar.expandTitle':'Expand all sections',
  'bar.compact':'Compact','bar.compactTitle':'Hide description texts',
- 'bar.plan':'Timetable','bar.print':'Print',
+ 'bar.plan':'Timetable','bar.print':'Print','bar.printTitle':'Print the catalogue or save it as a PDF',
  'bar.newfile':'Other file','bar.newfileTitle':'Load a different course catalogue',
  'bar.hits':'{0} of {1}',
 
  'f.show':'Show','f.onlyPicked':'My selection only','f.showHidden':'Show hidden',
  'f.area':'Area','f.location':'Location','f.allAreas':'All ({0})','f.noLocation':'not stated',
  'f.hidden':'hidden: {0}',
+ 'f.hiddenHint':'You can find hidden items again here',
  'f.hiddenSec':'{0} section','f.hiddenSecPl':'{0} sections',
  'f.hiddenCourse':'{0} course','f.hiddenCoursePl':'{0} courses',
 
@@ -874,14 +1178,17 @@ en:{
  'diff.f.name':'Title','diff.f.typ':'Type','diff.f.pers':'Taught by',
  'diff.f.sws':'Hours','diff.f.ects':'ECTS','diff.f.termine':'Times',
  'doc.standOldest':'oldest of {0} files: {1}',
- 'toc.title':'Contents',
+ 'toc.title':'Contents','krume.title':'Jump to the start of this part',
+ 'krume.prev':'Back to: {0}','krume.next':'On to: {0}',
+ 'krume.prevNone':'Nothing before this','krume.nextNone':'Nothing after this',
+ 'krume.jump':'Go to: {0}',
  'sec.hide':'hide','sec.show':'show','sec.hideTitle':'Hide this section',
  'sec.untitled':'Untitled',
 
  'card.untitled':'(untitled)',
  'card.sws':'hrs/week','card.ects':'ECTS','card.maxTn':'max. participants','card.lead':'Taught by:',
- 'card.fest':'Firm','card.evtl':'Maybe','card.hide':'✕',
- 'card.festTitle':'Plan this one firmly','card.evtlTitle':'Maybe — keep as an option',
+ 'card.fest':'Definite','card.evtl':'Maybe','card.hide':'✕',
+ 'card.festTitle':'Definitely taking this one','card.evtlTitle':'Maybe — keep as an option',
  'card.hideTitle':'Hide (not relevant for me)',
  'card.noTime':'Time t.b.a.',
  'card.dupes':'{0} identical time entries merged',
@@ -893,7 +1200,7 @@ en:{
  'card.alsoFileFrag':'{0} other file','card.alsoFileFragPl':'{0} other files',
  'card.alsoSecFrag':'{0} other section','card.alsoSecFragPl':'{0} other sections',
  'card.clash':'⚠ Clashes with: {0}','card.clashMore':' and {0} more',
- 'card.desc':'▾ Description','card.descHide':'▴ Hide description',
+ 'card.desc':'Description','card.descHide':'Hide description',
  'card.note':'✎ Note','card.noteAdd':'✎ Add note',
  'card.notePh':'Your own note (e.g. register by …)',
 
@@ -903,23 +1210,37 @@ en:{
  'doc.courses':'{0} courses','doc.timed':'{0} with a fixed weekly slot',
  'doc.stand':'File date: {0}','doc.standToday':' (today)',
  'doc.standDay':' ({0} day ago)','doc.standDays':' ({0} days ago)',
- 'doc.standSoon':' — just before and at the start of the semester, times and rooms still change and new courses appear. Download a fresh export when you get the chance: the page will then show you what changed.',
+ 'doc.standSoonT':'This catalogue may be out of date ({0})',
+ 'doc.standAge1':'1 day','doc.standAge':'{0} days',
+ 'doc.standSoon':'Just before and at the start of the semester, times and rooms still change and new courses appear. Download a fresh export when you get the chance — the page will then show you what changed.',
  'doc.standUpd':'Update now',
- 'doc.standWo':' You can also do this any time under “Catalogues → update”.',
- 'doc.standOld':' — rooms and times change during the semester. Better download a fresh export from the portal; the page will then show you what is new or changed.',
+ 'doc.standWo':'You can also do this any time under “Catalogues → update”.',
+ 'doc.standOldT':'This catalogue is out of date ({0})',
+ 'doc.standOld':'Rooms and times change during the semester. Better download a fresh export from the portal; the page will then show you what is new or changed.',
+ 'doc.standHide':'Hide this notice for a week',
 
  'plan.title':'Timetable',
- 'plan.evtl':'Maybe','plan.evtlTitle':'Show maybe-courses in the grid',
- 'plan.block':'Block/single','plan.blockTitle':'Show block and single dates in the grid',
- 'plan.day':'Day','plan.dayTitle':'Switch between week and day view',
+ 'plan.evtl':'Maybe','plan.evtlTitle':'Show courses you marked with ? in the grid',
+ 'plan.evtlSub':'Courses you marked with ?',
+ 'plan.block':'Not weekly',
+ 'plan.blockTitle':'Show block and single dates in the grid — they appear dotted there',
+ 'plan.blockSub':'Block and single dates, i.e. everything that does not take place every week. They appear dotted in the grid.',
+ 'plan.viewTitle':'What the grid shows',
+ 'plan.viewLimited':'Something is hidden right now — tap here to change it.',
+ 'plan.day':'Day','plan.week':'Week','plan.dayTitle':'Switch to a single day',
+ 'plan.weekTitle':'Back to the whole week',
  'plan.addOwn':'+ Own entry','plan.addOwnTitle':'Add your own entry (main subject, practice, sport …)',
  'plan.print':'Print / PDF','plan.ics':'Calendar (.ics)','plan.save':'Save','plan.load':'Load',
+ 'plan.download':'Export','plan.dlTitle':'Export timetable',
+ 'plan.printSub':'Print the week grid and list, or save as PDF',
+ 'plan.icsSub':'Add the entries to your calendar app',
+ 'plan.saveSub':'Save your selection as a file to take to another device',
  'plan.close':'Close',
- 'plan.empty':'Nothing selected yet. Mark courses in the catalogue as <b>Firm</b> or <b>Maybe</b> — they will show up in the grid. Your own entries such as main subject, practice or sport go in via <b>+ Own entry</b> above.',
- 'plan.sumFest':'planned firmly','plan.sumEvtl':'maybe',
+ 'plan.empty':'Nothing selected yet. Mark courses in the catalogue with the green <b>tick</b> (definite) or the amber <b>question mark</b> (maybe) — they will show up in the grid. Your own entries such as main subject, practice or sport go in via <b>+ Own entry</b> above.',
+ 'plan.sumFest':'definite','plan.sumEvtl':'maybe',
  'plan.sumSws':'hrs/week','plan.sumEcts':'ECTS*','plan.sumEctsNo':' · {0}× without a number',
- 'plan.conflict':'⚠ {0} real clash between firmly planned entries (marked red).',
- 'plan.conflictPl':'⚠ {0} real clashes between firmly planned entries (marked red).',
+ 'plan.conflict':'⚠ {0} real clash between definite entries (marked red).',
+ 'plan.conflictPl':'⚠ {0} real clashes between definite entries (marked red).',
  'plan.divWarn':'⚠ The loaded files disagree',
  'plan.divItem':'{0} {1} — showing the version from “{2}”',
  'plan.divNote':'These courses appear in several files with differing times or rooms. The version that actually has a time is shown; if both do, the one from the newer file. Check the portal if in doubt.',
@@ -929,9 +1250,9 @@ en:{
  'plan.locNote':'Rule of thumb: a warning appears below {0} minutes. Check the travel time yourself — depending on the connection it may be tighter or easier.',
  'plan.scrollhint':'The grid can be scrolled sideways →',
  'plan.dayCount':'{0} entries',
- 'plan.listFest':'Planned firmly ({0})','plan.listEvtl':'Maybe ({0})',
+ 'plan.listFest':'Definite ({0})','plan.listEvtl':'Maybe ({0})',
  'plan.noFixed':'no fixed time',
- 'plan.toEvtl':'→ Maybe','plan.toFest':'→ Firm',
+ 'plan.toEvtl':'→ Maybe','plan.toFest':'→ Definite',
  'plan.remove':'remove','plan.edit':'edit',
  'plan.unsched':'Without a fixed weekly slot ({0})',
  'plan.unschedNote':'Block seminars or time still open — details are in the notes in the catalogue.',
@@ -955,7 +1276,7 @@ en:{
  'help.q2':'Questions about a particular course?',
  'help.a2':'Ask the teaching staff directly. Where a registration address is given, it appears as a ✉ button on that course card.',
  'help.q3':'Is my timetable saved?',
- 'help.a3':'Yes — in your browser, on this device. You can simply close the page and carry on later. On another device or in another browser you start fresh: for that, press <b>Save</b> in the timetable, take the file with you and press <b>Load</b> there.',
+ 'help.a3':'Yes — in your browser, on this device. You can simply close the page and carry on later. On another device or in another browser you start fresh: for that, press <b>↓</b> (save) in the timetable, take the file with you and press <b>↑</b> (load) there.',
  'help.q4':'Something on this page is not working?',
  'help.mail':'Send me an email: ','help.ask':'Contact {0}',
  'help.askNone':'Contact whoever gave you this file',
@@ -1509,6 +1830,64 @@ function quelleAktualisieren(id, xmlText, name, mtime){
 
 /* Einstieg ins Aktualisieren von überall: bei genau einem Verzeichnis
    direkt die Dateiauswahl, sonst die Liste öffnen und auswählen lassen. */
+var STAND_TAGE=-1, STAND_ZEIT=0;
+var SVG_INFO='<circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16.5"/>'+
+             '<line x1="12" y1="7.6" x2="12.01" y2="7.6"/>';
+var SVG_WARN='<path d="M10.3 3.6 1.9 17.6a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0z"/>'+
+             '<line x1="12" y1="9" x2="12" y2="13.5"/><line x1="12" y1="17" x2="12.01" y2="17"/>';
+function standStufe(){ return STAND_TAGE>STAND_WARNUNG_TAGE ? 'alt' : 'hinweis'; }
+/* Wegklicken verschafft eine Woche Ruhe, danach meldet sich der Hinweis wieder —
+   die Datei wird ja auch jede Woche eine Woche älter. Wird sie in der Zwischenzeit
+   richtig alt, kommt er sofort wieder, denn dann ist es etwas anderes. */
+function standVerdeckt(){
+  var w=state.ui.standWeg;
+  if(!w || !w.zeit) return false;
+  if(w.stufe!==standStufe()) return false;
+  return (Date.now()-w.zeit) < STAND_RUHE_TAGE*86400000;
+}
+function standHinweisZeigen(){
+  var host=$('#standBox'); if(!host) return;
+  host.innerHTML='';
+  if(STAND_TAGE<STAND_HINWEIS_TAGE) return;
+  if(standVerdeckt()) return;
+  var warn=STAND_TAGE>STAND_WARNUNG_TAGE;
+  var alter=t(STAND_TAGE===1?'doc.standAge1':'doc.standAge', STAND_TAGE);
+
+  var wrap=document.createElement('div'); wrap.className='standwrap';
+  var inner=document.createElement('div');
+  var box=document.createElement('div'); box.className='standbox'+(warn?' alt':'');
+  box.innerHTML='<svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+    (warn?SVG_WARN:SVG_INFO)+'</svg>';
+
+  var txt=document.createElement('div'); txt.className='standbox-txt';
+  var h=document.createElement('b');
+  h.textContent=t(warn?'doc.standOldT':'doc.standSoonT', alter);
+  var p=document.createElement('p');
+  p.textContent=warn ? t('doc.standOld') : t('doc.standSoon');
+  var akt=document.createElement('div'); akt.className='standbox-akt';
+  var knopf=document.createElement('button'); knopf.type='button'; knopf.className='standupd';
+  knopf.textContent=t('doc.standUpd');
+  knopf.onclick=aktualisierenStarten;
+  var wo=document.createElement('span'); wo.className='standwo'; wo.textContent=t('doc.standWo');
+  akt.appendChild(knopf); akt.appendChild(wo);
+  txt.appendChild(h); txt.appendChild(p); txt.appendChild(akt);
+
+  var zu=document.createElement('button'); zu.type='button'; zu.className='standzu';
+  zu.title=t('doc.standHide'); zu.setAttribute('aria-label',t('doc.standHide'));
+  zu.innerHTML='<svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+    '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  zu.onclick=function(){
+    state.ui.standWeg={zeit:Date.now(), stufe:standStufe()}; saveState();
+    wrap.classList.add('weg');
+    setTimeout(function(){ host.innerHTML=''; },300);
+  };
+
+  box.appendChild(txt); box.appendChild(zu);
+  inner.appendChild(box); wrap.appendChild(inner); host.appendChild(wrap);
+}
+
 function aktualisierenStarten(){
   if(SOURCES.length===1){
     QUELLE_ZUM_AKTUALISIEREN=SOURCES[0].id;
@@ -1609,6 +1988,23 @@ function setStatus(id,st){
   saveState();
 }
 
+var SEG_SVG={};
+(function(){
+  var pfade={
+    fest:'<polyline points="20 6 9 17 4 12"/>',
+    vielleicht:'<path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/>'+
+               '<line x1="12" y1="17.5" x2="12.01" y2="17.5"/>',
+    raus:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
+  };
+  Object.keys(pfade).forEach(function(k){
+    var d=document.createElement('div');
+    d.innerHTML='<svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+      'stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+      pfade[k]+'</svg>';
+    SEG_SVG[k]=d.firstChild;
+  });
+})();
+
 function renderCourse(c){
   var a=document.createElement('article');
   a.className='kurs'; a.dataset.id=c.id; a.id='k-'+c.id;
@@ -1620,14 +2016,18 @@ function renderCourse(c){
   top.appendChild(h);
 
   var seg=document.createElement('div'); seg.className='seg';
-  [['fest',t('card.fest')],['vielleicht',t('card.evtl')],['raus',t('card.hide')]].forEach(function(p){
+  ['fest','vielleicht','raus'].forEach(function(st){
     var b=document.createElement('button');
-    b.type='button'; b.dataset.st=p[0]; b.textContent=p[1];
+    b.type='button'; b.dataset.st=st;
+    b.appendChild(SEG_SVG[st].cloneNode(true));
     b.title={fest:t('card.festTitle'),vielleicht:t('card.evtlTitle'),
-             raus:t('card.hideTitle')}[p[0]];
+             raus:t('card.hideTitle')}[st];
+    b.setAttribute('aria-label',b.title);
     b.onclick=function(ev){ev.stopPropagation();
-      setStatus(c.id, statusOf(c.id)===p[0] ? '' : p[0]);
+      var neu = statusOf(c.id)===st ? '' : st;
+      setStatus(c.id, neu);
       refreshById(c.id); updateCounts(); refreshClashHints(); runFilter();
+      if(neu==='raus') augeHervorheben();
       if($('#plan').classList.contains('open')) drawPlan();};
     seg.appendChild(b);
   });
@@ -1696,25 +2096,49 @@ function renderCourse(c){
   var warn=document.createElement('div'); warn.className='clashwarn'; warn.hidden=true;
   a.appendChild(warn); a._warn=warn;
 
+  /* Alle Beschreibungsblöcke in einen Behälter: nur so lässt sich die Höhe
+     weich auf- und zufahren (Raster von 0fr auf 1fr). */
+  var dwrap=document.createElement('div'); dwrap.className='desc';
+  var dinner=document.createElement('div'); dinner.className='desc-in';
+  dwrap.appendChild(dinner);
   c.blocks.forEach(function(b){
     var d=document.createElement('div'); d.className='block';
     var s=document.createElement('span'); s.className='block-label'; s.textContent=t('blk.'+b.key);
     d.appendChild(s); d.appendChild(b.frag.cloneNode(true));
-    a.appendChild(d);
+    dinner.appendChild(d);
   });
+  a.appendChild(dwrap);
 
   /* Im Kompaktmodus: Beschreibung dieser einen Karte zeigen */
   if(c.blocks.length){
     a.classList.add('hasdesc');
     var dt=document.createElement('button');
     dt.type='button'; dt.className='desc-toggle';
-    dt.textContent=t('card.desc');
-    dt.onclick=function(ev){
-      ev.stopPropagation();
-      var auf=a.classList.toggle('showdesc');
-      dt.textContent=t(auf?'card.descHide':'card.desc');
-    };
+    dt.innerHTML='<svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+      '<polyline points="6 9 12 15 18 9"/></svg><span class="dtxt"></span>';
+    var dtxt=dt.querySelector('.dtxt');
+    function descStand(){
+      var auf=a.classList.contains('showdesc');
+      dtxt.textContent=t(auf?'card.descHide':'card.desc');
+      dt.setAttribute('aria-expanded',auf?'true':'false');
+    }
+    dt.onclick=function(ev){ ev.stopPropagation();
+      a.classList.toggle('showdesc'); descStand(); };
+    descStand();
     a.appendChild(dt);
+    /* Die ganze Karte reagiert aufs Tippen. Ausgenommen: der Beschreibungstext
+       selbst (da wird gelesen und markiert), Knöpfe, Links und das Notizfeld.
+       Gezogen statt getippt heißt markieren, nicht umschalten. */
+    var ab=null;
+    a.addEventListener('pointerdown',function(ev){ ab=[ev.clientX,ev.clientY]; });
+    a.addEventListener('click',function(ev){
+      if(!document.body.classList.contains('compact')) return;
+      if(ev.target.closest && ev.target.closest('.desc,.desc-toggle,a,button,input,textarea,select,label')) return;
+      if(ab && (Math.abs(ev.clientX-ab[0])>6 || Math.abs(ev.clientY-ab[1])>6)) return;
+      if(String(getSelection ? getSelection() : '').length) return;
+      a.classList.toggle('showdesc'); descStand();
+    });
   }
 
   /* Notizfeld */
@@ -1762,7 +2186,7 @@ function renderSection(sec){
   ttl.innerHTML='<span class="caret">▾</span><h'+hl+' class="sec-title">'+esc(sec.title)+'</h'+hl+'>';
   var cnt=document.createElement('span'); cnt.className='sec-count'; cnt.textContent=sec.count;
   ttl.appendChild(cnt);
-  function toggle(){el.classList.toggle('collapsed');}
+  function toggle(){el.classList.toggle('collapsed'); faltStand(); ortAnstossen();}
   ttl.onclick=toggle;
   ttl.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}};
   head.appendChild(ttl);
@@ -1771,9 +2195,11 @@ function renderSection(sec){
   hide.title=t('sec.hideTitle');
   hide.textContent=t('sec.hide');
   hide.onclick=function(ev){ev.stopPropagation();
-    if(state.hiddenSections[sec.id]) delete state.hiddenSections[sec.id];
-    else state.hiddenSections[sec.id]=1;
-    saveState(); applySectionHiding(); buildTOC();};
+    var wirdVersteckt=!state.hiddenSections[sec.id];
+    if(wirdVersteckt) state.hiddenSections[sec.id]=1;
+    else delete state.hiddenSections[sec.id];
+    saveState(); applySectionHiding(); buildTOC();
+    if(wirdVersteckt) augeHervorheben();};
   head.appendChild(hide);
   el.appendChild(head);
 
@@ -1801,21 +2227,49 @@ function applySectionHiding(){
   var parts=[];
   if(nS) parts.push(tn(nS,'f.hiddenSec'));
   if(nC) parts.push(tn(nC,'f.hiddenCourse'));
-  $('#hiddenInfo').textContent=parts.length?t('f.hidden',parts.join(', ')):'';
+  var knopf=$('#fHidden'), zahl=$('#hiddenCount');
+  if(zahl) zahl.textContent = (nS+nC) ? String(nS+nC) : '';
+  if(knopf) knopf.title = parts.length
+      ? t('f.hidden',parts.join(', '))+' — '+t('f.showHidden')
+      : t('f.showHidden');
 }
 
 /* ═══════════════ TOC ═══════════════ */
+var TOC_LINKS={};
 function buildTOC(){
   var toc=$('#toc');
-  toc.innerHTML='';
-  /* Auf schmalen Schirmen stehen die Werkzeugknöpfe hier statt in der Kopfleiste */
+  toc.innerHTML=''; TOC_LINKS={};
+  /* Überschrift zuoberst: in der Schublade steht sonst gar nicht, worin man ist */
+  var kopf=document.createElement('div'); kopf.className='toc-head';
+  kopf.innerHTML='<svg class="brandicon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">'+
+    '<rect width="32" height="32" rx="7" fill="#7a1f2b"/>'+
+    '<rect x="4.5" y="7.5" width="7" height="10" rx="2" fill="#fff"/>'+
+    '<rect x="12.5" y="13" width="7" height="11.5" rx="2" fill="#fff"/>'+
+    '<rect x="20.5" y="9.5" width="7" height="8" rx="2" fill="#fff"/></svg>'+
+    '<span><b>HfMT</b><small></small></span>';
+  kopf.querySelector('small').textContent=(CAT&&CAT.title)||'';
+  toc.appendChild(kopf);
+  /* Auf schmalen Schirmen stehen die selteneren Knöpfe hier statt in der Kopfleiste */
   var tools=document.createElement('div'); tools.className='toctools';
-  [['collapseAll','bar.collapse'],['expandAll','bar.expand'],['compactBtn','bar.compact'],
-   ['printBtn','bar.print'],['newFileBtn','bar.newfile'],['langBtn','lang.other']].forEach(function(p){
+  [['foldBtn','bar.collapse'],['printBtn','bar.print'],
+   ['newFileBtn','bar.newfile'],['langBtn','lang.other']].forEach(function(p){
     var orig=$('#'+p[0]); if(!orig) return;
-    var b=document.createElement('button'); b.type='button'; b.textContent=t(p[1]);
+    var b=document.createElement('button'); b.type='button';
+    b.dataset.proxy=p[0];
+    /* Zeichen und Wort vom Original übernehmen — nur die Kennungen müssen weg,
+       sonst gäbe es sie zweimal im Dokument. */
+    b.innerHTML=orig.innerHTML;
+    [].forEach.call(b.querySelectorAll('[id]'),function(e){ e.removeAttribute('id'); });
+    b.className = p[0]==='langBtn' ? 'langbtn' : orig.className;
+    var wort=b.querySelector('.btxt');
+    if(wort) wort.textContent=t(p[0]==='foldBtn' ? (allesZu()?'bar.expand':'bar.collapse') : p[1]);
+    else if(p[0]!=='langBtn') b.textContent=t(p[1]);
     b.classList.toggle('on',orig.classList.contains('on'));
-    b.onclick=function(){ tocZu(); orig.click(); b.classList.toggle('on',orig.classList.contains('on')); };
+    b.onclick=function(){
+      if(p[0]!=='foldBtn') tocZu();      /* beim Falten bleibt die Schublade offen */
+      orig.click();
+      b.classList.toggle('on',orig.classList.contains('on'));
+    };
     tools.appendChild(b);
   });
   toc.appendChild(tools);
@@ -1832,9 +2286,155 @@ function buildTOC(){
     a.onclick=function(e){e.preventDefault();
       var p=el; while(p){if(p.classList&&p.classList.contains('sec'))p.classList.remove('collapsed');p=p.parentNode;}
       tocZu();
-      el.scrollIntoView({behavior:'smooth',block:'start'});};
+      scrollZu(el);};
+    TOC_LINKS[sec.id]=a;
     toc.appendChild(a);
   });
+  ORT_JETZT=null; KRUME_OBEN=''; ortAnstossen();
+}
+
+/* ═══════════════ Wo bin ich gerade? ═══════════════ */
+/* Gesucht ist die tiefste Rubrik, die gerade die Linie unter der Kopfleiste
+   kreuzt — das ist der Bereich, dessen Einträge man vor sich hat. */
+function rubrikAnDerLinie(){
+  var f=document.querySelector('.filters');
+  if(!f) return null;
+  var sichtbar=$('#krume') && $('#krume').classList.contains('an');
+  var y=f.getBoundingClientRect().bottom+(sichtbar?streifenHoehe():0)+34, treffer=null;
+  for(var i=0;i<allS.length;i++){
+    var el=allS[i];
+    if(el.classList.contains('hidden')||el.classList.contains('userhidden')) continue;
+    var r=el.getBoundingClientRect();
+    if(r.height<=0) continue;
+    if(r.top<=y && r.bottom>y &&
+       (!treffer || el._sec.level>treffer._sec.level)) treffer=el;
+  }
+  return treffer;
+}
+/* Blättern geht zur nächsten Rubrik, gleich welcher Ebene — in der Reihenfolge,
+   in der sie im Verzeichnis stehen. */
+function nachbarRubrik(richtung){
+  if(!ORT_JETZT) return null;
+  var reihe=[];
+  for(var i=0;i<allS.length;i++){
+    var el=allS[i];
+    if(el.classList.contains('hidden')||el.classList.contains('userhidden')) continue;
+    if(el.offsetParent===null) continue;        /* steckt in einer zugeklappten Rubrik */
+    reihe.push(el);
+  }
+  var i2=reihe.indexOf(ORT_JETZT);
+  return i2<0 ? null : (reihe[i2+richtung]||null);
+}
+function blaetterStand(){
+  [[-1,'#krumeZur','krume.prev','krume.prevNone'],
+   [ 1,'#krumeVor','krume.next','krume.nextNone']].forEach(function(o){
+    var b=$(o[1]); if(!b) return;
+    var z=nachbarRubrik(o[0]);
+    b.disabled=!z;
+    b.title = z ? t(o[2], z._sec.title) : t(o[3]);
+  });
+}
+function kopfHoehe(){
+  var b=document.querySelector('.bar'), f=document.querySelector('.filters');
+  return (b?b.offsetHeight:0)+(f?f.offsetHeight:0);
+}
+function streifenHoehe(){
+  var inn=document.querySelector('.krume-in');
+  return inn ? inn.offsetHeight+10 : 0;   /* plus sein Abstand zur Kopfleiste */
+}
+function scrollZu(el){
+  if(!el) return;
+  var ziel=window.scrollY + el.getBoundingClientRect().top - kopfHoehe() - 10;
+  /* Unterhalb von 140 wird der Streifen nicht gezeigt, dann braucht er auch
+     keinen Platz. Darüber verdeckt er sonst genau die angesprungene Zeile. */
+  if(ziel>140) ziel-=streifenHoehe();
+  window.scrollTo({top:Math.max(0,ziel), behavior:'smooth'});
+}
+/* Neue Teile gleiten herein, statt zu springen. Startwert ist nicht 0,
+   damit auch beim schnellen Scrollen immer etwas lesbar bleibt. */
+function krumeEin(el){
+  el.classList.add('neu');
+  var fertig=function(){ el.classList.remove('neu'); };
+  requestAnimationFrame(function(){ requestAnimationFrame(fertig); });
+  setTimeout(fertig,70);
+}
+var KRUME_OBEN='';
+var ORT_JETZT=null, ortWartet=false;
+function ortAnstossen(){
+  if(ortWartet) return; ortWartet=true;
+  var lauf=function(){ if(!ortWartet) return; ortWartet=false; ortZeigen(); };
+  requestAnimationFrame(lauf);
+  setTimeout(lauf,100);
+}
+function ortZeigen(){
+  var el=rubrikAnDerLinie(), kr=$('#krume');
+  if(!kr) return;
+  var zeigen = !!el && window.scrollY>140 && $('#screenApp') && !$('#screenApp').hidden;
+  kr.classList.toggle('an',zeigen);
+  if(el===ORT_JETZT) return;
+  ORT_JETZT=el;
+  $$('#toc a.hier,#toc a.imPfad').forEach(function(a){ a.classList.remove('hier','imPfad'); });
+  if(!el){ blaetterStand(); return; }
+  /* Pfad von außen nach innen sammeln */
+  var pfad=[], p=el;
+  while(p){ pfad.unshift(p);
+    p=p.parentNode && p.parentNode.closest ? p.parentNode.closest('section.sec') : null; }
+  pfad.forEach(function(sec,i){
+    var a=TOC_LINKS[sec.id]; if(!a) return;
+    a.classList.add(i===pfad.length-1 ? 'hier' : 'imPfad');
+  });
+  /* Jede Stufe ein eigener Knopf. Die übergeordneten stehen umgekehrt im Baum,
+     damit beim Engwerden die äußersten wegfallen statt der nächstgelegenen. */
+  var txt=$('#krumeTxt');
+  var oben=pfad.slice(0,-1);
+  /* Die Oberstufen nur anfassen, wenn sie sich wirklich ändern. Das spart das
+     Flackern beim Weiterscrollen und erhält die seitliche Schiebeposition. */
+  var obenKennung=oben.map(function(x){return x._sec.id;}).join('|');
+  if(obenKennung!==KRUME_OBEN){
+    KRUME_OBEN=obenKennung;
+    var altVor=txt.querySelector('.krume-vor');
+    if(altVor) altVor.parentNode.removeChild(altVor);
+    if(oben.length){
+      var vor=document.createElement('div'); vor.className='krume-vor';
+      oben.slice().reverse().forEach(function(sec){
+        var k=document.createElement('button'); k.type='button'; k.className='krume-stufe';
+        k.title=t('krume.jump', sec._sec.title);
+        var n=document.createElement('span'); n.textContent=sec._sec.title;
+        var tr=document.createElement('span'); tr.className='tr'; tr.textContent='›';
+        k.appendChild(n); k.appendChild(tr);
+        k.onclick=function(){ scrollZu(sec); };
+        vor.appendChild(k);
+      });
+      txt.insertBefore(vor, txt.firstChild);
+      /* Umgekehrte Richtung heißt je nach Browser negative Scrollwerte — darum
+         mit dem Betrag rechnen: 0 ist die Ausgangslage am rechten Ende. */
+      var raender=function(){
+        var platz=vor.scrollWidth-vor.clientWidth, pos=Math.abs(vor.scrollLeft);
+        vor.classList.toggle('ml', pos < platz-1);
+        vor.classList.toggle('mr', pos > 1);
+      };
+      vor.addEventListener('scroll',raender,{passive:true});
+      raender(); krumeEin(vor);
+    }
+  }
+  var altB=txt.querySelector('.krume-hier');
+  if(altB) altB.parentNode.removeChild(altB);
+  var b=document.createElement('button'); b.type='button'; b.className='krume-hier';
+  b.title=t('krume.title'); b.textContent=el._sec.title;
+  b.onclick=function(){ scrollZu(el); };
+  txt.appendChild(b); krumeEin(b);
+  blaetterStand();
+  tocNachziehen(TOC_LINKS[el._sec.id]);
+}
+/* Die Seitenleiste mitführen, aber nur wenn sie überhaupt zu sehen ist */
+function tocNachziehen(a, sofort){
+  var toc=$('#toc');
+  if(!a||!toc) return;
+  if(window.innerWidth<=880 && !toc.classList.contains('open')) return;
+  var ar=a.getBoundingClientRect(), tr=toc.getBoundingClientRect(), ziel=null;
+  if(ar.top < tr.top+8) ziel=toc.scrollTop+(ar.top-tr.top)-60;
+  else if(ar.bottom > tr.bottom-8) ziel=toc.scrollTop+(ar.bottom-tr.bottom)+60;
+  if(ziel!=null) toc.scrollTo({top:Math.max(0,ziel), behavior: sofort?'auto':'smooth'});
 }
 
 /* ═══════════════ Änderungsübersicht ═══════════════ */
@@ -1930,11 +2530,95 @@ function renderDiff(){
     var k=b.dataset.k; DIFF_OFFEN[k]=!DIFF_OFFEN[k]; renderDiff(); }; });
 }
 
+/* ═══════════════ Dialog ═══════════════ */
+var sheetZu=null, sheetTakt=null;
+function oeffneSheet(titel, bauer){
+  var sh=$('#sheet'); $('#sheetTitle').textContent=titel;
+  var body=$('#sheetBody'); body.innerHTML='';
+  bauer(body);
+  clearTimeout(sheetTakt);
+  sh.hidden=false;
+  /* zwei Bilder warten: sonst ist der Startzustand nie gezeichnet und nichts gleitet */
+  var zeig=function(){ sh.classList.add('auf'); };
+  requestAnimationFrame(function(){ requestAnimationFrame(zeig); });
+  setTimeout(zeig,80);
+  sheetZu=function(){
+    sheetZu=null; sh.classList.remove('auf');
+    sheetTakt=setTimeout(function(){ sh.hidden=true; body.innerHTML=''; },240);
+  };
+}
+$('#sheetClose').onclick=function(){ if(sheetZu) sheetZu(); };
+$('#sheet').addEventListener('click',function(e){ if(e.target===$('#sheet')&&sheetZu) sheetZu(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&sheetZu) sheetZu(); });
+
+/* Standortauswahl als Dialog (auf dem Handy statt einer Chip-Reihe) */
+function oeffneStandorte(){
+  oeffneSheet(t('f.location'), function(body){
+    var freq={};
+    CAT.courses.forEach(function(c){c.orte.forEach(function(o){freq[o]=(freq[o]||0)+1;});});
+    var liste=orteAll.slice();
+    if(CAT.courses.some(function(c){return !c.orte.length;})) liste.push('(ohne)');
+    state.ui.orte=state.ui.orte||{};
+    liste.forEach(function(o){
+      var lab=document.createElement('label'); lab.className='sheet-chip';
+      var cb=document.createElement('input'); cb.type='checkbox';
+      cb.checked = state.ui.orte[o]!==false;
+      cb.onchange=function(){
+        state.ui.orte[o]=!cb.checked ? false : true;
+        saveState(); buildOrte(); runFilter();
+      };
+      var txt=document.createElement('span');
+      txt.textContent=(o==='(ohne)'?t('f.noLocation'):o)+(freq[o]?' ('+freq[o]+')':'');
+      lab.appendChild(cb); lab.appendChild(txt); body.appendChild(lab);
+    });
+  });
+}
+
+/* Was im Raster steht — am Handy statt zweier Symbole ohne Beschriftung */
+function oeffnePlanAnsicht(){
+  oeffneSheet(t('plan.viewTitle'), function(body){
+    [['showEvtl','plan.evtl','plan.evtlSub'],
+     ['showBlock','plan.block','plan.blockSub']].forEach(function(o){
+      var lab=document.createElement('label'); lab.className='sheet-chip';
+      var cb=document.createElement('input'); cb.type='checkbox';
+      cb.checked=state.ui[o[0]]!==false;
+      cb.onchange=function(){
+        state.ui[o[0]]=!!cb.checked; saveState();
+        planSchalterStand(); drawPlan();
+      };
+      var txt=document.createElement('span');
+      var b=document.createElement('b'); b.textContent=t(o[1]);
+      var sm=document.createElement('small'); sm.textContent=t(o[2]);
+      txt.appendChild(b); txt.appendChild(sm);
+      lab.appendChild(cb); lab.appendChild(txt); body.appendChild(lab);
+    });
+  });
+}
+/* Der Knopf zeigt, wohin er führt: im Wochenraster „Tag“, im Tag „Woche“. */
+function tagStand(){
+  if(typeof state==='undefined' || !state || !state.ui) return;
+  var tag=!!state.ui.planTag, b=$('#tDay'); if(!b) return;
+  b.classList.toggle('on',tag);
+  var l=$('#tDayLbl'); if(l) l.textContent=t(tag?'plan.week':'plan.day');
+  b.title=t(tag?'plan.weekTitle':'plan.dayTitle');
+}
+
+/* Die zwei Schalter, der Sammelknopf und sein Warnton hängen am selben Zustand */
+function planSchalterStand(){
+  if(typeof state==='undefined' || !state || !state.ui) return;
+  var ev=state.ui.showEvtl!==false, bl=state.ui.showBlock!==false;
+  var a=$('#tEvtl'), b=$('#tBlock'), v=$('#planView');
+  if(a) a.classList.toggle('on',ev);
+  if(b) b.classList.toggle('on',bl);
+  if(v){ v.classList.toggle('eingeschraenkt',!ev||!bl);
+         v.title=(!ev||!bl)?t('plan.viewLimited'):t('plan.viewTitle'); }
+}
+
 /* ═══════════════ Quellenliste ═══════════════ */
 function renderQuellen(){
   var btn=$('#srcBtn'), panel=$('#srcPanel');
   btn.hidden=false;
-  btn.textContent=t('src.btn',SOURCES.length);
+  var tx=$('#srcTxt'); if(tx) tx.textContent=t('src.btn',SOURCES.length);
   btn.classList.toggle('on',!panel.hidden);
   if(panel.hidden) return;
   var h='<h3>'+esc(t('src.title'))+'</h3><ul>';
@@ -1990,6 +2674,23 @@ function buildBereiche(){
     buildTOC(); runFilter();
     window.scrollTo(0,0);
   };
+}
+
+/* Beim allerersten Ausblenden einmal zeigen, wo das Versteckte wieder
+   auftaucht — sonst wirkt das Ausblenden wie eine Einbahnstraße. */
+function augeHervorheben(){
+  if(state.ui.augeGezeigt) return;
+  state.ui.augeGezeigt=1; saveState();
+  var b=$('#fHidden'); if(!b) return;
+  b.classList.add('puls');
+  var bub=document.createElement('div');
+  bub.className='augentipp'; bub.textContent=t('f.hiddenHint');
+  document.body.appendChild(bub);
+  var r=b.getBoundingClientRect();
+  bub.style.left=Math.max(8, Math.min(r.left-6, window.innerWidth-bub.offsetWidth-8))+'px';
+  bub.style.top=(r.bottom+9)+'px';
+  setTimeout(function(){ bub.classList.add('weg'); }, 3800);
+  setTimeout(function(){ bub.remove(); b.classList.remove('puls'); }, 4400);
 }
 
 /* ═══════════════ Filter / Suche ═══════════════ */
@@ -2061,6 +2762,7 @@ function runFilter(){
   var wirdGefiltert = !!term || onlyPicked || !!state.ui.bereich || orteAus ||
                       (state.ui.showHidden!==true && n<allK.length);
   $('#hits').textContent = wirdGefiltert ? t('bar.hits',n,allK.length) : '';
+  ORT_JETZT=null; ortAnstossen();
 }
 
 /* ═══════════════ Kollisionshinweise im Katalog ═══════════════ */
@@ -2227,10 +2929,17 @@ function eigenFormOeffnen(id){
   $('#efDel').hidden=!ev;
   $('#efSave').textContent=t(ev?'ef.update':'ef.save');
   efFarbenMalen();
-  $('#eigenForm').hidden=false;
+  var efEl=$('#eigenForm'); clearTimeout(efTakt); efEl.hidden=false;
+  var efZeig=function(){ efEl.classList.add('auf'); };
+  requestAnimationFrame(function(){ requestAnimationFrame(efZeig); });
+  setTimeout(efZeig,80);
   $('#efTitel').focus();
 }
-function eigenFormSchliessen(){ $('#eigenForm').hidden=true; efAktuell=null; }
+var efTakt=null;
+function eigenFormSchliessen(){
+  var el=$('#eigenForm'); el.classList.remove('auf'); efAktuell=null;
+  clearTimeout(efTakt); efTakt=setTimeout(function(){ el.hidden=true; },240);
+}
 function eigenSpeichern(){
   var titel=$('#efTitel').value.trim(),
       tag=$('#efTag').value, von=$('#efVon').value, bis=$('#efBis').value,
@@ -2606,8 +3315,9 @@ function buildOrte(){
   orteAll=Object.keys(freq).filter(function(o){return freq[o]>=3;})
           .sort(function(a,b){return freq[b]-freq[a];}).slice(0,8);
   var box=$('#orteChips'); box.innerHTML='';
-  if(!orteAll.length){$('#orteLbl').hidden=true; return;}
-  $('#orteLbl').hidden=false;
+  var ob=$('#orteBtn');
+  if(!orteAll.length){$('#orteLbl').hidden=true; if(ob) ob.hidden=true; return;}
+  $('#orteLbl').hidden=false; if(ob) ob.hidden=false;
   state.ui.orte=state.ui.orte||{};
   var withOrt=CAT.courses.filter(function(c){return c.orte.length;}).length;
   var labels=orteAll.slice();
@@ -2620,6 +3330,11 @@ function buildOrte(){
     b.onclick=function(){state.ui.orte[o]=(state.ui.orte[o]===false); saveState(); paint(); runFilter();};
     paint(); box.appendChild(b);
   });
+  /* Knopf zeigt, wie viele Standorte abgewählt sind */
+  var aus=0, uo=state.ui.orte||{};
+  labels.forEach(function(o){ if(uo[o]===false) aus++; });
+  var oc=$('#orteCount'); if(oc) oc.textContent = aus ? String(aus) : '';
+  if(ob) ob.classList.toggle('on', aus>0);
 }
 
 /* ═══════════════ App-Start ═══════════════ */
@@ -2638,20 +3353,15 @@ function buildApp(cat){
     var tage=Math.floor((Date.now()-aeltest)/86400000);
     var d=new Date(aeltest);
     var ds=('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
-    var stufe = tage>STAND_WARNUNG_TAGE ? ' alt'
-              : (tage>=STAND_HINWEIS_TAGE ? ' hinweis' : '');
-    sub+='<br><span class="stand'+stufe+'">'+
+    /* Das Datum steht schlicht in der Kopfzeile — der Rat kommt als eigene Karte */
+    sub+='<br><span class="stand">'+
          (SOURCES.length>1?t('doc.standOldest',SOURCES.length,ds):t('doc.stand',ds))+
          (tage>0?t(tage===1?'doc.standDay':'doc.standDays',tage):t('doc.standToday'))+
-         (tage>STAND_WARNUNG_TAGE ? t('doc.standOld')
-          : (tage>=STAND_HINWEIS_TAGE ? t('doc.standSoon') : ''))+
-         (tage>=STAND_HINWEIS_TAGE
-            ? ' <button class="standupd">'+esc(t('doc.standUpd'))+'</button>'+
-              '<span class="standwo">'+esc(t('doc.standWo'))+'</span>'
-            : '')+'</span>';
-  }
+         '</span>';
+    STAND_TAGE=tage; STAND_ZEIT=aeltest;
+  } else { STAND_TAGE=-1; STAND_ZEIT=0; }
   $('#docSub').innerHTML=sub;
-  var su=$('.standupd'); if(su) su.onclick=aktualisierenStarten;
+  standHinweisZeigen();
 
   var host=$('#catalog'); host.innerHTML='';
   cat.nodes.forEach(function(n){
@@ -2675,9 +3385,7 @@ function buildApp(cat){
   $('#compactBtn').classList.toggle('on',!!state.ui.compact);
   $('#fHidden').classList.toggle('on',!!state.ui.showHidden);
   $('#fPicked').classList.toggle('on',!!state.ui.onlyPicked);
-  $('#tEvtl').classList.toggle('on',state.ui.showEvtl!==false);
-  $('#tBlock').classList.toggle('on',state.ui.showBlock!==false);
-  $('#tDay').classList.toggle('on',!!state.ui.planTag);
+  planSchalterStand(); tagStand(); faltStand();
 
   updateCounts(); refreshClashHints(); runFilter();
   $('#screenStart').hidden=true; $('#screenApp').hidden=false;
@@ -2807,6 +3515,25 @@ function ladeBeispiel(b,btn){
 }
 
 /* ─── Sprache anwenden ─── */
+/* Flaggen als Zeichnung statt Emoji — Windows stellt Flaggen-Emoji
+   sonst nur als Buchstabenpaar dar. */
+var FLAGGE={
+ de:'<svg class="flag" viewBox="0 0 24 16" aria-hidden="true">'+
+    '<rect width="24" height="16" fill="#000"/>'+
+    '<rect y="5.33" width="24" height="5.34" fill="#DD0000"/>'+
+    '<rect y="10.67" width="24" height="5.33" fill="#FFCE00"/></svg>',
+ en:'<svg class="flag" viewBox="0 0 24 16" aria-hidden="true">'+
+    '<rect width="24" height="16" fill="#012169"/>'+
+    '<path d="M0 0 L24 16 M24 0 L0 16" stroke="#fff" stroke-width="3.2"/>'+
+    '<path d="M0 0 L24 16 M24 0 L0 16" stroke="#C8102E" stroke-width="1.9"/>'+
+    '<path d="M12 0 V16 M0 8 H24" stroke="#fff" stroke-width="5.3"/>'+
+    '<path d="M12 0 V16 M0 8 H24" stroke="#C8102E" stroke-width="3.2"/></svg>'
+};
+function sprachKnopfInhalt(){
+  var ziel = LANG==='de' ? 'en' : 'de';
+  return FLAGGE[ziel]+'<span class="flagtxt">'+(ziel==='en'?'EN':'DE')+'</span>';
+}
+
 function qisLinkHtml(){
   return QIS_URL
     ? '<a href="'+esc(QIS_URL)+'" target="_blank" rel="noopener">'+esc(QIS_NAME)+'</a>'
@@ -2822,10 +3549,13 @@ function applyI18n(){
   var st=$('#steps'); if(st) st.innerHTML=t('start.steps').replace('{LINK}',qisLinkHtml());
   var pl=$('#planLbl'); if(pl) pl.textContent=t('bar.plan');
   [['#langBtn'],['#langBtnStart']].forEach(function(p){
-    var b=$(p[0]); if(b){ b.textContent=t('lang.other'); b.title=t('lang.title'); }});
+    var b=$(p[0]); if(b){ b.innerHTML=sprachKnopfInhalt(); b.title=t('lang.title'); }});
   var ef=$('#efSave'); if(ef) ef.textContent=t(efAktuell?'ef.update':'ef.save');
   renderBeispiele();
   renderHelp();
+  planSchalterStand(); tagStand(); faltStand();   /* Titel wurden gerade überschrieben */
+  ORT_JETZT=null; KRUME_OBEN=''; ortAnstossen();
+  if(typeof state!=='undefined' && state && state.ui) standHinweisZeigen();
 }
 function flushState(){
   clearTimeout(saveTimer);
@@ -2891,8 +3621,24 @@ function setLang(l){
 
 /* ─── App-Bedienung verdrahten ─── */
 $('#q').addEventListener('input',runFilter);
-$('#collapseAll').onclick=function(){allS.forEach(function(s){s.classList.add('collapsed');});};
-$('#expandAll').onclick=function(){allS.forEach(function(s){s.classList.remove('collapsed');});};
+/* Ein Knopf für beides. Ist alles zugeklappt, klappt der nächste Druck alles auf. */
+function allesZu(){ return allS.length>0 && allS.every(function(s){
+  return s.classList.contains('collapsed'); }); }
+function faltStand(){
+  var zu=allesZu(), b=$('#foldBtn'); if(!b) return;
+  b.classList.toggle('alleszu',zu);
+  var l=$('#foldLbl'); if(l) l.textContent=t(zu?'bar.expand':'bar.collapse');
+  b.title=t(zu?'bar.expandTitle':'bar.collapseTitle');
+  var kn=$('#toc .toctools [data-proxy="foldBtn"]');
+  if(kn){ kn.classList.toggle('alleszu',zu);
+    var k=kn.querySelector('.btxt');
+    if(k) k.textContent=t(zu?'bar.expand':'bar.collapse'); }
+}
+$('#foldBtn').onclick=function(){
+  var zu=allesZu();
+  allS.forEach(function(s){ s.classList.toggle('collapsed',!zu); });
+  faltStand(); ORT_JETZT=null; ortAnstossen();
+};
 $('#compactBtn').onclick=function(){
   state.ui.compact=!state.ui.compact; saveState();
   document.body.classList.toggle('compact',state.ui.compact);
@@ -2903,7 +3649,7 @@ $('#fPicked').onclick=function(){
 $('#fHidden').onclick=function(){
   state.ui.showHidden=!state.ui.showHidden; saveState();
   document.body.classList.toggle('show-hidden',state.ui.showHidden);
-  this.classList.toggle('on',state.ui.showHidden); runFilter();};
+  this.classList.toggle('on',state.ui.showHidden); runFilter(); applySectionHiding();};
 /* Kopfleiste und Filterzeile umbrechen je nach Breite unterschiedlich —
    ihre echten Höhen messen, damit die Klebepositionen stimmen. */
 function syncKopfhoehen(){
@@ -2916,14 +3662,41 @@ function syncKopfhoehen(){
 window.addEventListener('resize',syncKopfhoehen);
 
 /* Inhaltsverzeichnis als Schublade (Handy) */
-function tocAuf(){ $('#toc').classList.add('open'); $('#tocBack').hidden=false; }
+function tocAuf(){ $('#toc').classList.add('open'); $('#tocBack').hidden=false;
+  /* Schublade öffnet sich dort, wo man gerade ist */
+  if(ORT_JETZT) tocNachziehen(TOC_LINKS[ORT_JETZT._sec.id], true); }
 function tocZu(){ $('#toc').classList.remove('open'); $('#tocBack').hidden=true; }
 $('#tocBtn').onclick=function(){
   if($('#toc').classList.contains('open')) tocZu(); else tocAuf();};
 $('#tocBack').onclick=tocZu;
+function zuRubrik(richtung){
+  var z=nachbarRubrik(richtung); if(!z) return;
+  scrollZu(z);
+  /* Der Standort wird beim Scrollen neu bestimmt; hier nur schon mal nachziehen,
+     damit die Knöpfe nicht einen Wimpernschlag lang das Falsche behaupten. */
+  ORT_JETZT=z; blaetterStand();
+}
+$('#krumeZur').onclick=function(){ zuRubrik(-1); };
+$('#krumeVor').onclick=function(){ zuRubrik(1); };
+window.addEventListener('scroll',ortAnstossen,{passive:true});
+window.addEventListener('resize',ortAnstossen);
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape' && $('#toc').classList.contains('open')) tocZu();});
 window.addEventListener('resize',function(){ if(window.innerWidth>880) tocZu(); });
+
+/* Suche auf schmalen Schirmen hinter einem Symbol */
+$('#searchBtn').onclick=function(){
+  var auf=document.body.classList.toggle('suche');
+  $('#searchBtn').setAttribute('aria-expanded', auf?'true':'false');
+  if(auf){ $('#q').focus(); }
+  else { $('#q').value=''; runFilter(); }
+  syncKopfhoehen();
+  setTimeout(syncKopfhoehen,320);   /* nach dem Ausrollen nochmal nachmessen */
+};
+$('#orteBtn').onclick=function(){
+  if(window.innerWidth<=880) oeffneStandorte();
+  else { /* am Desktop stehen die Chips ohnehin daneben */ oeffneStandorte(); }
+};
 
 $('#printBtn').onclick=function(){window.print();};
 $('#newFileBtn').onclick=zurueckZumStart;
@@ -2951,10 +3724,10 @@ $('#planClose').onclick=function(){plan.classList.remove('open');eigenFormSchlie
 plan.addEventListener('click',function(e){if(e.target===plan)plan.classList.remove('open');});
 document.addEventListener('keydown',function(e){
   if(e.key!=='Escape'||!plan.classList.contains('open')) return;
-  if(!$('#eigenForm').hidden) eigenFormSchliessen();   /* erst Formular, dann Fenster */
+  if($('#eigenForm').classList.contains('auf')) eigenFormSchliessen();   /* erst Formular, dann Fenster */
   else plan.classList.remove('open');});
 $('#eigenAdd').onclick=function(){
-  if($('#eigenForm').hidden || efAktuell) eigenFormOeffnen(null);
+  if(!$('#eigenForm').classList.contains('auf') || efAktuell) eigenFormOeffnen(null);
   else eigenFormSchliessen();};
 $('#efSave').onclick=eigenSpeichern;
 $('#efCancel').onclick=eigenFormSchliessen;
@@ -2963,7 +3736,8 @@ $('#eigenForm').addEventListener('keydown',function(e){
   if(e.key==='Enter'){ e.preventDefault(); eigenSpeichern(); }});
 $('#tEvtl').onclick=function(){
   state.ui.showEvtl=state.ui.showEvtl===false; saveState();
-  this.classList.toggle('on',state.ui.showEvtl!==false); drawPlan();};
+  planSchalterStand(); drawPlan();};
+$('#planView').onclick=oeffnePlanAnsicht;
 $('#tDay').onclick=function(){
   if(state.ui.planTag){ state.ui.planTag=null; }
   else {
@@ -2971,10 +3745,28 @@ $('#tDay').onclick=function(){
     var heute=DAYS[(new Date().getDay()+6)%7];
     state.ui.planTag=(heute==='Sa'||heute==='So')?'Mo':heute;
   }
-  saveState(); this.classList.toggle('on',!!state.ui.planTag); drawPlan();};
+  saveState(); tagStand(); drawPlan();};
 $('#tBlock').onclick=function(){
   state.ui.showBlock=state.ui.showBlock===false; saveState();
-  this.classList.toggle('on',state.ui.showBlock!==false); drawPlan();};
+  planSchalterStand(); drawPlan();};
+$('#planDl').onclick=function(){
+  oeffneSheet(t('plan.dlTitle'), function(body){
+    [['plan.print','plan.printSub','#planPrint',
+      '<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/>'],
+     ['plan.ics','plan.icsSub','#planIcs',
+      '<rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="5"/><line x1="16" y1="2" x2="16" y2="5"/>'],
+     ['plan.save','plan.saveSub','#planExport',
+      '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>']
+    ].forEach(function(o){
+      var b=document.createElement('button'); b.type='button'; b.className='sheet-opt';
+      b.innerHTML='<svg class="ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+o[3]+'</svg><span><b>'+esc(t(o[0]))+'</b>'+
+                  '<small>'+esc(t(o[1]))+'</small></span>';
+      b.onclick=function(){ if(sheetZu) sheetZu(); $(o[2]).click(); };
+      body.appendChild(b);
+    });
+  });
+};
+
 $('#planPrint').onclick=function(){
   document.body.classList.add('printing-plan'); window.print();
   setTimeout(function(){document.body.classList.remove('printing-plan');},600);};

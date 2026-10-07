@@ -25,7 +25,8 @@ gleichen XML-Format.
 
 Zum reinen Ausprobieren liegt ein Beispielverzeichnis bei (EMP / IGP), das sich auf der
 Startseite mit einem Klick laden lässt — **ohne Login, aber auch ohne Aktualität**. Es ist
-eine Momentaufnahme und wird nicht gepflegt; ab 60 Tagen weist die Seite selbst darauf hin.
+eine Momentaufnahme und wird nicht gepflegt; ab einer Woche weist die Seite selbst darauf hin
+und bietet einen Knopf zum Aktualisieren an.
 Für die echte Planung gilt der eigene, frische Export. Der Knopf erscheint nur auf der
 gehosteten Fassung: eine lokal geöffnete Kopie darf keine Nachbardateien lesen.
 
@@ -46,7 +47,7 @@ Das dauert bei großen Bäumen ein bis zwei Minuten. Und es geht nur eingeloggt.
 
 - **Katalog** mit Baumstruktur, einklappbaren Rubriken, Inhaltsverzeichnis und Volltextsuche
   (umlauttolerant: „Übung" = „ubung" = „Uebung")
-- **Dreistufige Auswahl**: fest · vielleicht · ausgeblendet
+- **Dreistufige Auswahl** je Veranstaltung: ✓ fest · ? vielleicht · ✕ ausgeblendet
 - **Stundenplan** als Wochen- oder Tagesraster, mit Konflikterkennung
 - **Standortwechsel-Warnung**, wenn zwischen zwei Terminen an verschiedenen Orten
   zu wenig Zeit liegt
@@ -54,17 +55,25 @@ Das dauert bei großen Bäumen ein bis zwei Minuten. Und es geht nur eingeloggt.
 - **Filter** nach Standort und Studiengang/Bereich — exportierst du weit oben im Baum,
   lassen sich die enthaltenen Studiengänge einzeln isolieren; dazu Ausblenden einzelner
   Kurse und ganzer Rubriken
-- **Export**: Kalenderdatei (.ics), Auswahl als JSON sichern/laden, Drucken als PDF
-- **Mehrere Verzeichnisse gleichzeitig** — z. B. zwei Studiengänge; jede Quelle wird
-  eine eigene oberste Rubrik und lässt sich einzeln wieder entfernen
-- **Fassungsvergleich**: lädst du einen neueren Export desselben Verzeichnisses, zeigt die
-  Seite, was neu, entfallen und geändert ist — zuerst das, was deine eigene Auswahl betrifft
+- **Export**: Kalenderdatei (.ics), Auswahl sichern/laden (↓/↑), Drucken als PDF
+- **Mehrere Verzeichnisse gleichzeitig** — z. B. zwei Studiengänge; jedes wird
+  eine eigene oberste Rubrik und lässt sich einzeln entfernen oder aktualisieren
+- **Fassungsvergleich** (*Verzeichnisse → aktualisieren*): lädst du einen neueren Export
+  desselben Verzeichnisses, zeigt die Seite, was neu, entfallen und geändert ist — nach
+  Tragweite sortiert und zuerst das, was deine eigene Auswahl betrifft. Reine
+  Umbenennungen lassen sich ausblenden.
 - **Zweisprachig** Deutsch/Englisch
 - Läuft auf dem Handy
 
 ## Hosting
 
-Die Datei ist in sich geschlossen — nur `index.html` hochladen, sonst nichts.
+Die App ist eine einzige Datei ohne Abhängigkeiten. Ins Repo gehören:
+
+| Datei | nötig? |
+|---|---|
+| `index.html` | ja — das ist die App |
+| `beispiel-emp-igp.xml` | nur, wenn der Beispiel-Knopf funktionieren soll (siehe `BEISPIELE`) |
+| `README.md`, `LICENSE`, `.gitignore` | optional |
 
 Mit GitHub Pages: Repository anlegen, Datei als `index.html` hochladen,
 unter *Settings → Pages* als Quelle `main` / `root` wählen. Nach ein bis zwei Minuten
@@ -82,7 +91,10 @@ Ganz oben im `<script>`-Block stehen alle Einstellungen:
 |---|---|
 | `QIS_URL`, `QIS_NAME` | Link zum Campus-Portal in der Anleitung |
 | `GEHOSTET_HOSTS` | eigene Domains, auf denen fest gehostet wird |
+| `GEHOSTET` | `true` erzwingt „fest gehostet", unabhängig von der Adresse |
 | `WECHSEL_MIN` | Minuten Puffer, ab wann ein Standortwechsel gewarnt wird |
+| `STAND_HINWEIS_TAGE`, `STAND_WARNUNG_TAGE` | ab wie vielen Tagen zum Neu-Exportieren geraten bzw. gewarnt wird |
+| `STAND_RUHE_TAGE` | wie lange der Hinweis nach dem Wegklicken wegbleibt |
 | `KONTAKT_MAIL`, `KONTAKT_NAME` | Kontakt im „Fragen?"-Block (leer = kein Kontakt) |
 | `BEISPIELE` | mitgelieferte Beispieldateien samt Exportdatum (leere Liste = kein Beispielbereich) |
 
@@ -106,8 +118,8 @@ Analyse, keine Cookies — die gehostete Seite liefert nur statische Dateien aus
 
 A single HTML file that turns the XML export of a QIS/HISinOne course catalogue into a
 searchable overview with a timetable planner, clash detection and calendar export.
-No server, no installation, no data leaves your browser. The interface is available in
-German and English (toggle in the top right).
+No backend, no installation, no data leaves your browser. The interface is available in
+German and English (flag button, top right — on narrow screens in the ☰ drawer).
 
 **Unofficial tool, no guarantee.** The data comes from the XML file you upload yourself and
 is a snapshot from the moment of export. Rooms, times and offerings change during the
