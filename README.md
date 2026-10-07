@@ -19,7 +19,7 @@ gleichen XML-Format.
 
 ## Benutzen
 
-1. **[Seite öffnen](https://hfmtkarl.github.io/stundenplaner/)**
+1. **[Seite öffnen](https://hfmtkarl.github.io/HfMT-Stundenplaner/)**
 2. XML-Datei aus dem Campus-Portal herunterladen (die Anleitung dazu steht auf der Startseite)
 3. Datei auf die Seite ziehen — fertig
 
