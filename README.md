@@ -1,9 +1,9 @@
 # Vorlesungsverzeichnis & Stundenplaner
 
-Eine einzelne HTML-Datei, die aus dem XML-Export eines QIS/HISinOne-Vorlesungsverzeichnisses
+Dieses Tool dient dazu die Vorlesungsverzeichnisse der HfMT Köln übersichtlicher anzuzeigen und Stundenpläne zusammenzustellen.
+Alles steckt in einer einzelnen HTML-Datei, die aus dem XML-Export eines Vorlesungsverzeichnisses (QIS/HISinOne)
 eine durchsuchbare Übersicht macht — mit Stundenplan, Überschneidungswarnung und
-Kalenderexport. Kein Backend, keine Installation, keine Datenübertragung: alles läuft
-im Browser — ob über eine gehostete Adresse oder als lokal geöffnete Datei.
+Kalenderexport. Alles läuft lokal im Browser, die index.hmtl Datei kann auch heruntergeladen werden und ohne Internetverbindung genutzt werden.
 
 Gebaut für die HfMT Köln, funktioniert aber mit jedem Vorlesungsverzeichnis im
 gleichen XML-Format.
@@ -19,7 +19,7 @@ gleichen XML-Format.
 
 ## Benutzen
 
-1. **[Seite öffnen](https://DEINNAME.github.io/stundenplaner/)**
+1. **[Seite öffnen](https://hfmtkarl.github.io/HfMT-Stundenplaner/)**
 2. XML-Datei aus dem Campus-Portal herunterladen (die Anleitung dazu steht auf der Startseite)
 3. Datei auf die Seite ziehen — fertig
 
