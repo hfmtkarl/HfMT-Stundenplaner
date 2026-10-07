@@ -193,6 +193,11 @@ main{flex:1;min-width:0;max-width:920px;margin:0 auto;padding:1.3rem 1.6rem 6rem
  border-radius:6px;padding:.15rem .45rem;display:inline-block;margin-top:.25rem;}
 .stand.hinweis{color:#55555d;background:var(--soft);border:1px solid var(--line);
  border-radius:6px;padding:.15rem .45rem;display:inline-block;margin-top:.25rem;}
+.standupd{border:1px solid var(--accent);background:var(--accent);color:#fff;
+ border-radius:7px;padding:.18rem .6rem;font-size:12px;font-weight:600;cursor:pointer;
+ margin:0 .35rem;white-space:nowrap;}
+.standupd:hover{filter:brightness(1.1);}
+.standwo{font-size:.9em;opacity:.85;}
 
 /* ============ Sections ============ */
 .sec{margin:.2rem 0;}
@@ -673,7 +678,7 @@ de:{
  'src.add':'+ Datei hinzufügen','src.replace':'Alle ersetzen',
  'src.only':'nur diese','src.courses':'{0} Veranstaltungen',
  'src.hint':'Mehrere Dateien gleichzeitig möglich — z. B. zwei Studiengänge.',
- 'start.fresh':'<b>Verzeichnis aktuell halten.</b> Kurz vor und zu Beginn des Semesters können noch Veranstaltungen dazu kommen oder Zeiten und Räume ändern sich. Du kannst jederzeit einen neueren Export nachladen — die Seite vergleicht dann selbst und zeigt dir, was neu, entfallen oder geändert ist. Deine Auswahl bleibt dabei erhalten.',
+ 'start.fresh':'<b>Verzeichnis aktuell halten.</b> Kurz vor und zu Beginn des Semesters können noch Veranstaltungen dazu kommen oder Zeiten und Räume ändern sich. Du kannst jederzeit einen neueren Export nachladen (unter <b>Verzeichnisse → aktualisieren</b>) — die Seite vergleicht dann selbst und zeigt dir, was neu, entfallen oder geändert ist. Deine Auswahl bleibt dabei erhalten.',
  'src.dupAsk':'„{0}" ({1}) ist bereits geladen.\n\nOK = ersetzen und Änderungen anzeigen\nAbbrechen = zusätzlich laden',
  'diff.title':'Änderungen gegenüber der vorherigen Fassung',
  'diff.sum':'{0} neu · {1} entfallen · {2} geändert',
@@ -726,6 +731,8 @@ de:{
  'doc.stand':'Stand der Datei: {0}','doc.standToday':' (heute)',
  'doc.standDay':' (vor {0} Tag)','doc.standDays':' (vor {0} Tagen)',
  'doc.standSoon':' — kurz vor und zu Beginn des Semesters ändern sich Zeiten und Räume noch häufig, und es kommen Veranstaltungen dazu. Lade bei Gelegenheit einen frischen Export: die Seite zeigt dir dann, was sich geändert hat.',
+ 'doc.standUpd':'Jetzt aktualisieren',
+ 'doc.standWo':' Geht auch jederzeit unter „Verzeichnisse → aktualisieren".',
  'doc.standOld':' — Räume und Zeiten ändern sich im Semester. Lade dir am besten einen frischen Export aus dem Portal; die Seite zeigt dir anschließend, was neu oder geändert ist.',
 
  'plan.title':'Stundenplan',
@@ -844,7 +851,7 @@ en:{
  'src.add':'+ Add file','src.replace':'Replace all',
  'src.only':'only this one','src.courses':'{0} courses',
  'src.hint':'Several files at once are fine — e.g. two degree programmes.',
- 'start.fresh':'<b>Keep the catalogue up to date.</b> Just before and at the start of the semester, courses may still be added or times and rooms may change. You can load a newer export at any time — the page then compares them itself and shows you what is new, removed or changed. Your selection is kept.',
+ 'start.fresh':'<b>Keep the catalogue up to date.</b> Just before and at the start of the semester, courses may still be added or times and rooms may change. You can load a newer export at any time (under <b>Catalogues → update</b>) — the page then compares them itself and shows you what is new, removed or changed. Your selection is kept.',
  'src.dupAsk':'“{0}” ({1}) is already loaded.\n\nOK = replace and show what changed\nCancel = load it in addition',
  'diff.title':'Changes compared with the previous version',
  'diff.sum':'{0} new · {1} removed · {2} changed',
@@ -897,6 +904,8 @@ en:{
  'doc.stand':'File date: {0}','doc.standToday':' (today)',
  'doc.standDay':' ({0} day ago)','doc.standDays':' ({0} days ago)',
  'doc.standSoon':' — just before and at the start of the semester, times and rooms still change and new courses appear. Download a fresh export when you get the chance: the page will then show you what changed.',
+ 'doc.standUpd':'Update now',
+ 'doc.standWo':' You can also do this any time under “Catalogues → update”.',
  'doc.standOld':' — rooms and times change during the semester. Better download a fresh export from the portal; the page will then show you what is new or changed.',
 
  'plan.title':'Timetable',
@@ -1496,6 +1505,19 @@ function quelleAktualisieren(id, xmlText, name, mtime){
   SOURCES.forEach(function(sq){sq.label='';});
   rebuildCatalog(); buildApp(CAT); quellenSichern(); renderDiff();
   if(!LETZTER_DIFF) alert(t('src.updNone'));
+}
+
+/* Einstieg ins Aktualisieren von überall: bei genau einem Verzeichnis
+   direkt die Dateiauswahl, sonst die Liste öffnen und auswählen lassen. */
+function aktualisierenStarten(){
+  if(SOURCES.length===1){
+    QUELLE_ZUM_AKTUALISIEREN=SOURCES[0].id;
+    $('#updInput').click();
+  } else {
+    var p=$('#srcPanel');
+    p.hidden=false; renderQuellen(); syncKopfhoehen();
+    p.scrollIntoView({behavior:'smooth',block:'start'});
+  }
 }
 
 function quelleWeg(id){
@@ -2622,9 +2644,14 @@ function buildApp(cat){
          (SOURCES.length>1?t('doc.standOldest',SOURCES.length,ds):t('doc.stand',ds))+
          (tage>0?t(tage===1?'doc.standDay':'doc.standDays',tage):t('doc.standToday'))+
          (tage>STAND_WARNUNG_TAGE ? t('doc.standOld')
-          : (tage>=STAND_HINWEIS_TAGE ? t('doc.standSoon') : ''))+'</span>';
+          : (tage>=STAND_HINWEIS_TAGE ? t('doc.standSoon') : ''))+
+         (tage>=STAND_HINWEIS_TAGE
+            ? ' <button class="standupd">'+esc(t('doc.standUpd'))+'</button>'+
+              '<span class="standwo">'+esc(t('doc.standWo'))+'</span>'
+            : '')+'</span>';
   }
   $('#docSub').innerHTML=sub;
+  var su=$('.standupd'); if(su) su.onclick=aktualisierenStarten;
 
   var host=$('#catalog'); host.innerHTML='';
   cat.nodes.forEach(function(n){
